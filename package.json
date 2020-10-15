@@ -1,7 +1,7 @@
 {
   "name": "@simonrauch/harvey",
   "version": "0.1.3",
-  "description": "a small helper script for working with hcl harvest bookings",
+  "description": "A small helper script for working with hcl Harvest bookings.",
   "bin": {
     "harvey": "./cli.js"
   },
