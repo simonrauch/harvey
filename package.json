@@ -1,0 +1,22 @@
+{
+  "name": "harvey",
+  "version": "0.0.1",
+  "description": "a small helper script for working with hcl harvest bookings",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/simonrauch/homebridge-optoma-projector-telnet.git"
+  },
+  "bugs": {
+    "url": "https://github.com/simonrauch/homebridge-optoma-projector-telnet/issues"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\""
+  },
+  "keywords": [
+    "harvest",
+    "hcl"
+  ],
+  "author": "Simon Rauch <sr@simonrauch.com>",
+  "license": "MIT"
+}
