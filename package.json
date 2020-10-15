@@ -1,8 +1,10 @@
 {
-  "name": "harvey",
+  "name": "@simonrauch/harvey",
   "version": "0.0.1",
   "description": "a small helper script for working with hcl harvest bookings",
-  "main": "index.js",
+  "bin": {
+    "harvey": "./cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/simonrauch/harvey.git"
