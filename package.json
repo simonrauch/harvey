@@ -5,10 +5,10 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/simonrauch/homebridge-optoma-projector-telnet.git"
+    "url": "git://github.com/simonrauch/harvey.git"
   },
   "bugs": {
-    "url": "https://github.com/simonrauch/homebridge-optoma-projector-telnet/issues"
+    "url": "https://github.com/simonrauch/harvey/issues"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\""
