@@ -54,7 +54,7 @@ function addAliases(aliases) {
     })
 
     if (missingAliases.length > 0) {
-        const hclTasks = hclQuery('hcl tasks').split(/\r\n|\r|\n/);
+        const hclTasks = hclQuery('tasks').split(/\r\n|\r|\n/);
         missingAliases.forEach(missingAlias => {
             const filteredHclTasks = hclTasks.filter(task => task.includes(missingAlias))
             if (filteredHclTasks.length < 1) {
