@@ -1,9 +1,9 @@
 {
   "name": "@simonrauch/harvey",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A small helper script for working with hcl Harvest bookings.",
   "bin": {
-    "harvey": "./cli.js"
+    "harvey": "./build/cli.js"
   },
   "repository": {
     "type": "git",
@@ -13,12 +13,21 @@
     "url": "https://github.com/simonrauch/harvey/issues"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\""
+    "build": "npx tsc"
   },
   "keywords": [
-    "harvest",
-    "hcl"
+    "harvest"
   ],
   "author": "Simon Rauch <sr@simonrauch.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "node-harvest-api": "^1.0.6",
+    "yargs": "^17.3.1"
+  },
+  "devDependencies": {
+    "@types/filesystem": "^0.0.32",
+    "@types/node": "^17.0.21",
+    "@types/yargs": "^17.0.8",
+    "typescript": "^4.6.2"
+  }
 }
