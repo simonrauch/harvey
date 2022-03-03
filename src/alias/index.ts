@@ -98,6 +98,7 @@ async function findSingleProjectTaskAssignment(aliasKey: string, projectTaskAssi
     return new Promise(resolve => {
         if(projectTaskAssignments.length == 1) {
             resolve(projectTaskAssignments[0]);
+            return;
         }
 
         process.stdout.write(`Multiple tasks for "${aliasKey}" were found: \n`);
