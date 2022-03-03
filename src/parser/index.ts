@@ -1,0 +1,3 @@
+interface FileParser {
+    parserKey: string;
+}

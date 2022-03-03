@@ -4,6 +4,7 @@ import { createInterface as createReadlineInterface } from 'readline';
 import path from 'path';
 import { homedir } from 'os';
 
+//TODO add proto config, and add alias file path
 export interface Config {
     accountId: string;
     accessToken: string;

@@ -4,6 +4,7 @@ import type { Config } from "../config";
 import path from 'path';
 import { getAllProjectTaskAssignments } from "../harvest";
 import { createInterface as createReadlineInterface } from 'readline';
+import { HarveyError } from "../error";
 
 export interface Alias {
     alias: string;
@@ -11,26 +12,70 @@ export interface Alias {
     idTask: number;
 } 
 
-export async function addAlias(aliasKey: string, config: Config, aliasFilePath: string): Promise<void> {
-    const projectTaskAssignments = await getAllProjectTaskAssignments(config);
-    let filteredProjectTaskAssignments = projectTaskAssignments.filter((projectTaskAssignment: HarvestProjectTaskAssignment) => {
-        return projectTaskAssignment.task.name.includes(aliasKey);
+class AliasNotFoundError extends HarveyError {}
+
+export async function addAlias(aliasKey: string, config: Config, aliasFilePath: string): Promise<Alias> {
+    return new Promise(async resolve => {
+        const projectTaskAssignments = await getAllProjectTaskAssignments(config);
+        let filteredProjectTaskAssignments = projectTaskAssignments.filter((projectTaskAssignment: HarvestProjectTaskAssignment) => {
+            return projectTaskAssignment.task.name.includes(aliasKey);
+        })
+
+        if (filteredProjectTaskAssignments.length === 0) {
+            throw new Error(`Task "${aliasKey}" was not found.`)
+        }
+
+        if (filteredProjectTaskAssignments.length > 10) {
+            throw new Error(`Too many tasks for "${aliasKey}" were found. Please use a more specific alias.`)
+        }
+
+        const projectTaskAssignment = await findSingleProjectTaskAssignment(aliasKey, filteredProjectTaskAssignments);
+        const alias = mapProjectTaskAssignmentToAlias(aliasKey, projectTaskAssignment);
+
+        storeAlias(alias, aliasFilePath);
+
+        resolve(alias);
     })
-
-    if(filteredProjectTaskAssignments.length === 0) {
-        throw new Error(`Task "${aliasKey}" was not found.`)
-    }
-
-    if(filteredProjectTaskAssignments.length > 10) {
-        throw new Error(`Too many tasks for "${aliasKey}" were found. Please use a more specific alias.`)
-    }
-
-    const projectTaskAssignment = await findSingleProjectTaskAssignment(aliasKey, filteredProjectTaskAssignments);
-    const alias = mapProjectTaskAssignmentToAlias(aliasKey, projectTaskAssignment);
-
-    storeAlias(alias, aliasFilePath);
 }
 
+export async function bulkGetAliasesOrCreate(aliasKeys: Array<string>, config: Config, aliasFilePath: string): Promise<Map<string, Alias>>
+{
+    return new Promise(async resolve => {
+        let resultAliases: Map<string, Alias> = new Map();
+
+        for (const aliasKey of aliasKeys) {
+            resultAliases.set(aliasKey, await getAliasOrCreate(aliasKey, config, aliasFilePath))
+        }
+
+        resolve(resultAliases);
+    })
+
+}
+
+export async function getAliasOrCreate(aliasKey: string, config: Config, aliasFilePath: string): Promise<Alias> {
+    return new Promise(async resolve => {
+        try {
+            let alias = getAlias(aliasKey, aliasFilePath);
+            resolve(alias);
+        } catch (error) {
+            if (!(error instanceof AliasNotFoundError)) {
+                throw error;
+            }
+            let alias = await addAlias(aliasKey, config, aliasFilePath);
+            resolve(alias);
+        }
+    })
+}
+
+export function getAlias(aliasKey: string, aliasFilePath: string): Alias {
+    const alias = readAliasFile(aliasFilePath).get(aliasKey);
+
+    if(!alias) {
+        throw new AliasNotFoundError();
+    }
+
+    return alias;
+}
 
 export function removeAlias(aliasKey: string, aliasFilePath: string): void {
     let aliases = readAliasFile(aliasFilePath);

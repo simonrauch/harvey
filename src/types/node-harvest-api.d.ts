@@ -21,3 +21,11 @@ interface HarvestProjectTaskAssignment {
     task: HarvestTask;
     project: HarvestProject;
 }
+
+interface HarvestTimeEntry {
+    task_id: number;
+    hours: number;
+    project_id: number;
+    spent_date: string;
+    notes: string;
+}
