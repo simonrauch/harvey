@@ -1,3 +1,3 @@
 interface FileParser {
-    parserKey: string;
+  parserKey: string;
 }
