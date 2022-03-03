@@ -14,8 +14,8 @@
   },
   "scripts": {
     "build": "npx tsc",
-    "pkg:macos-x64": "npm run build && pkg . --targets node17-macos-x64 --output build/macos-x64/harvey",
-    "pkg:linux-x64": "npm run build && pkg . --targets node17-linux-x64 --output build/linux-x64/harvey"
+    "pkg:macos-x64": "npm run build && pkg . --targets node17-macos-x64 --output pkg/macos-x64/harvey",
+    "pkg:linux-x64": "npm run build && pkg . --targets node17-linux-x64 --output pkg/linux-x64/harvey"
   },
   "pkg": {
     "scripts": "build/**/*.js"
