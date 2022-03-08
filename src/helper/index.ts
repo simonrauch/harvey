@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { homedir } from 'os';
-import { HarveyError, HarveyFileNotFoundError } from '../error';
+import { HarveyError } from '../error';
 
 export function convertDateInputToISODate(dateInput?: string): string {
   const date = dateInput ? new Date(dateInput) : new Date();
