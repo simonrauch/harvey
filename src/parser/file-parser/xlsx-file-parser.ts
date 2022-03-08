@@ -3,19 +3,14 @@ import type { FileParser, ParserBookingEntry } from '..';
 import { Config } from '../../config';
 import { HarveyError } from '../../error';
 
-export interface XlsxFileParserConfig {
-  worksheet: string;
-  aliasColumn: string;
-  minutesColumn: string;
-}
 export class XlsxFileParser implements FileParser {
   parserKey: string = 'xlsx';
   async parseFile(filePath: string, config: Config): Promise<ParserBookingEntry[]> {
     return new Promise(async (resolve) => {
       const workbook = await this.readFile(filePath);
-      const worksheet = this.findWorksheetByName(config.fileParser.config.worksheet, workbook);
-      const aliasHeadingCell = this.findCellByValue(config.fileParser.config.aliasColumn, worksheet);
-      const minutesHeadingCell = this.findCellByValue(config.fileParser.config.minutesColumn, worksheet);
+      const worksheet = this.findWorksheetByName((config.fileParser.worksheet ??= 'Timebooking'), workbook);
+      const aliasHeadingCell = this.findCellByValue((config.fileParser.aliasColumn ??= 'Link'), worksheet);
+      const minutesHeadingCell = this.findCellByValue((config.fileParser.minutesColumn ??= 'Minutes'), worksheet);
       let aliasCell = worksheet.getCell(aliasHeadingCell.row + 1, aliasHeadingCell.col);
       let minutesCell = worksheet.getCell(minutesHeadingCell.row + 1, minutesHeadingCell.col);
       let entries: ParserBookingEntry[] = [];

@@ -31,9 +31,13 @@ interface HarvestTaskAssignment {
 }
 
 interface HarvestTimeEntry {
-  task_id: number;
+  id?: number;
+  task_id?: number;
   hours: number;
-  project_id: number;
+  project_id?: number;
   spent_date: string;
   notes: string;
+  is_running?: boolean;
+  task?: HarvestTask;
+  project?: HarvestProject;
 }

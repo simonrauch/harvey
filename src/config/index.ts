@@ -3,33 +3,33 @@ import Harvest from 'node-harvest-api';
 import { createInterface as createReadlineInterface } from 'readline';
 import path from 'path';
 import { transformPath } from '../helper';
-import { XlsxFileParserConfig } from '../parser/file-parser/xlsx-file-parser';
-import { CsvFileParserConfig } from '../parser/file-parser/csv-file-parser';
 
 export interface Config {
   accountId: string;
   accessToken: string;
   aliasFilePath: string;
+  pausedTimerFilePath: string;
   fileParser: FileParserConfig;
   harvestSubdomain?: string;
 }
 
 export interface FileParserConfig {
   type: string;
-  config: XlsxFileParserConfig | CsvFileParserConfig; //TODO
+  worksheet?: string;
+  aliasColumn?: string;
+  minutesColumn?: string;
 }
 
 const defaultConfig: Config = {
   accountId: '',
   accessToken: '',
   aliasFilePath: '~/.config/harvey/aliases.json',
+  pausedTimerFilePath: '~/.config/harvey/paused_timer.json',
   fileParser: {
     type: 'xlsx',
-    config: {
-      worksheet: 'Timebooking',
-      aliasColumn: 'Link',
-      minutesColumn: 'Minutes',
-    },
+    worksheet: 'Timebooking',
+    aliasColumn: 'Link',
+    minutesColumn: 'Minutes',
   },
 };
 

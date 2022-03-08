@@ -1,4 +1,5 @@
 export class HarveyError extends Error {}
+export class HarveyFileNotFoundError extends HarveyError {}
 
 export function handleError(error: any): void {
   error instanceof HarveyError

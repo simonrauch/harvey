@@ -1,5 +1,8 @@
 import type { Config } from '../config';
 import Harvest from 'node-harvest-api';
+import { time } from 'console';
+import { HarveyError } from '../error';
+import { resolve } from 'path/posix';
 
 let projectTaskAssignmentCache: Array<HarvestProjectTaskAssignment>;
 let projectAssignmentCache: Array<HarvestProjectAssignment>;
@@ -63,5 +66,53 @@ export async function getMyProjectTaskAssignments(
     }
     projectTaskAssignmentCache = projectTaskAssignments;
     resolve(projectTaskAssignmentCache);
+  });
+}
+
+export async function getRunningTimer(config: Config): Promise<HarvestTimeEntry | null> {
+  return new Promise((resolve) => {
+    const harvest = getHarvestSdk(config);
+    harvest.time_entries.get({ is_running: true }).then((timeEntries: HarvestTimeEntry[]) => {
+      if (timeEntries.length > 1) {
+        throw new HarveyError(
+          'You somehow managed to start multiple timers. Only one timer should be running. Please stop them and restart only the correct one.',
+        );
+      }
+      if (timeEntries[0]) {
+        resolve(timeEntries[0]);
+      }
+      resolve(null);
+    });
+  });
+}
+export async function saveTimer(timer: HarvestTimeEntry, config: Config): Promise<HarvestTimeEntry> {
+  return new Promise((resolve) => {
+    const harvest = getHarvestSdk(config);
+    if (timer.id) {
+      harvest.time_entries.update(timer.id, timer).then(resolve);
+    } else {
+      harvest.time_entries.create(timer).then(resolve);
+    }
+  });
+}
+
+export async function stopTimer(timer: HarvestTimeEntry, config: Config): Promise<HarvestTimeEntry> {
+  return new Promise((resolve) => {
+    const harvest = getHarvestSdk(config);
+    if (timer.id) {
+      harvest.time_entries.stop(timer.id).then(resolve);
+    } else {
+      resolve(timer);
+    }
+  });
+}
+export async function restartTimer(timer: HarvestTimeEntry, config: Config): Promise<HarvestTimeEntry> {
+  return new Promise((resolve) => {
+    const harvest = getHarvestSdk(config);
+    if (timer.id) {
+      harvest.time_entries.restart(timer.id).then(resolve);
+    } else {
+      resolve(timer);
+    }
   });
 }
