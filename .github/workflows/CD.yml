@@ -37,10 +37,6 @@ jobs:
         run: npm run pkg:macos-x64
       - name: Compress MacOS binary
         run: tar -cvzf ./harvey-macos-x64.tar.gz ./pkg/macos-x64/harvey
-      - name: Set SHA
-        id: shasum
-        run: |
-          echo ::set-output name=sha::"$(shasum -a 256 ./harvey-macos-x64.tar.gz | awk '{printf $1}')"
       - name: Upload release asset 
         uses: actions/upload-release-asset@v1
         with:
@@ -50,3 +46,20 @@ jobs:
           asset_content_type: application/gzip
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract Version
+        id: extract-version
+        run: |
+          printf "::set-output name=%s::%s\n" tag-name "${GITHUB_REF#refs/tags/}"
+      - name: Bump Homebrew formula
+      - uses: mislav/bump-homebrew-formula-action@v1
+        if: "!contains(github.ref, '-')" # skip prereleases
+        with:
+          formula-name: harvey
+          formula-path: Formula/harvey.rb
+          homebrew-tap: simonrauch/homebrew-tap
+          base-branch: master
+          download-url: https://github.com/simonrauch/harvey/releases/download/${{ steps.extract-version.outputs.tag-name }}/harvey-macos-x64.tar.gz
+          commit-message: |
+            {{formulaName}} {{version}}
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}

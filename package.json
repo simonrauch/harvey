@@ -1,6 +1,6 @@
 {
   "name": "@simonrauch/harvey",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "A simple CLI for Harvest.",
   "bin": {
     "harvey": "./build/cli.js"
@@ -17,8 +17,8 @@
     "prettier:fix": "prettier --write 'src/**/*.ts'",
     "build": "rm -rf build; npx tsc",
     "prepare": "npm run build",
-    "pkg:macos-x64": "npm run build && pkg . --targets node17-macos-x64 --output pkg/macos-x64/harvey",
-    "pkg:linux-x64": "npm run build && pkg . --targets node17-linux-x64 --output pkg/linux-x64/harvey"
+    "pkg:macos-x64": "pkg . --targets node17-macos-x64 --output pkg/macos-x64/harvey",
+    "pkg:linux-x64": "pkg . --targets node17-linux-x64 --output pkg/linux-x64/harvey"
   },
   "pkg": {
     "scripts": "build/**/*.js"
