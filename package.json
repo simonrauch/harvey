@@ -15,7 +15,8 @@
   "scripts": {
     "prettier": "prettier 'src/**/*.ts'",
     "prettier:fix": "prettier --write 'src/**/*.ts'",
-    "build": "npx tsc",
+    "build": "rm -rf build; npx tsc",
+    "prepare": "npm run build",
     "pkg:macos-x64": "npm run build && pkg . --targets node17-macos-x64 --output pkg/macos-x64/harvey",
     "pkg:linux-x64": "npm run build && pkg . --targets node17-linux-x64 --output pkg/linux-x64/harvey"
   },
