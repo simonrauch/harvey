@@ -1,10 +1,10 @@
-import { homedir } from 'os';
 import fs from 'fs';
 import path from 'path';
 import { createInterface as createReadlineInterface } from 'readline';
 import type { Config } from '../config';
-import { getAllProjectTaskAssignments } from '../harvest';
+import { getMyProjectTaskAssignments } from '../harvest';
 import { HarveyError } from '../error';
+import { transformPath } from '../helper';
 
 export interface Alias {
   alias: string;
@@ -14,9 +14,9 @@ export interface Alias {
 
 class AliasNotFoundError extends HarveyError {}
 
-export async function addAlias(aliasKey: string, config: Config, aliasFilePath: string): Promise<Alias> {
+export async function addAlias(aliasKey: string, config: Config): Promise<Alias> {
   return new Promise(async (resolve) => {
-    const projectTaskAssignments = await getAllProjectTaskAssignments(config);
+    const projectTaskAssignments = await getMyProjectTaskAssignments(config);
     const filteredProjectTaskAssignments = projectTaskAssignments.filter(
       (projectTaskAssignment: HarvestProjectTaskAssignment) => {
         return projectTaskAssignment.task.name.includes(aliasKey);
@@ -34,38 +34,22 @@ export async function addAlias(aliasKey: string, config: Config, aliasFilePath: 
     const projectTaskAssignment = await findSingleProjectTaskAssignment(aliasKey, filteredProjectTaskAssignments);
     const alias = mapProjectTaskAssignmentToAlias(aliasKey, projectTaskAssignment);
 
-    storeAlias(alias, aliasFilePath);
+    storeAlias(alias, config.aliasFilePath);
 
     resolve(alias);
   });
 }
 
-export async function bulkGetAliasesOrCreate(
-  aliasKeys: Array<string>,
-  config: Config,
-  aliasFilePath: string,
-): Promise<Map<string, Alias>> {
-  return new Promise(async (resolve) => {
-    const resultAliases: Map<string, Alias> = new Map();
-
-    for (const aliasKey of aliasKeys) {
-      resultAliases.set(aliasKey, await getAliasOrCreate(aliasKey, config, aliasFilePath));
-    }
-
-    resolve(resultAliases);
-  });
-}
-
-export async function getAliasOrCreate(aliasKey: string, config: Config, aliasFilePath: string): Promise<Alias> {
+export async function getAliasOrCreate(aliasKey: string, config: Config): Promise<Alias> {
   return new Promise(async (resolve) => {
     try {
-      const alias = getAlias(aliasKey, aliasFilePath);
+      const alias = getAlias(aliasKey, config.aliasFilePath);
       resolve(alias);
     } catch (error) {
       if (!(error instanceof AliasNotFoundError)) {
         throw error;
       }
-      const alias = await addAlias(aliasKey, config, aliasFilePath);
+      const alias = await addAlias(aliasKey, config);
       resolve(alias);
     }
   });
@@ -81,8 +65,8 @@ export function getAlias(aliasKey: string, aliasFilePath: string): Alias {
   return alias;
 }
 
-export function removeAlias(aliasKey: string, aliasFilePath: string): void {
-  const aliases = readAliasFile(aliasFilePath);
+export function removeAlias(aliasKey: string, config: Config): void {
+  const aliases = readAliasFile(config.aliasFilePath);
 
   if (!aliases.has(aliasKey)) {
     throw new Error(`"${aliasKey}" was not found. Nothing to remove.`);
@@ -90,11 +74,11 @@ export function removeAlias(aliasKey: string, aliasFilePath: string): void {
 
   aliases.delete(aliasKey);
 
-  writeAliasFile(aliases, aliasFilePath);
+  writeAliasFile(aliases, config.aliasFilePath);
 }
 
-export function removeAllAliases(aliasFilePath: string): void {
-  writeAliasFile(new Map(), aliasFilePath);
+export function removeAllAliases(config: Config): void {
+  writeAliasFile(new Map(), config.aliasFilePath);
 }
 
 async function findSingleProjectTaskAssignment(
@@ -168,8 +152,4 @@ function writeAliasFile(aliases: Map<string, Alias>, filePath: string): void {
 function aliasFileExists(filePath: string): boolean {
   filePath = transformPath(filePath);
   return fs.existsSync(filePath);
-}
-
-function transformPath(path: string): string {
-  return path.replace('~', homedir());
 }

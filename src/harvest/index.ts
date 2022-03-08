@@ -1,7 +1,8 @@
-import Harvest from 'node-harvest-api';
 import type { Config } from '../config';
+import Harvest from 'node-harvest-api';
 
 let projectTaskAssignmentCache: Array<HarvestProjectTaskAssignment>;
+let projectAssignmentCache: Array<HarvestProjectAssignment>;
 let harvestSdk: any;
 
 export function getHarvestSdk(config: Config): any {
@@ -21,31 +22,46 @@ export async function bookTimeEntry(timeEntry: HarvestTimeEntry, config: Config)
   });
 }
 
-export async function getAllProjectTaskAssignments(
+export async function getMyProjectAssignments(
   config: Config,
-  forceFetch = false,
-): Promise<Array<HarvestProjectTaskAssignment>> {
+  forceFetch: boolean = false,
+): Promise<HarvestProjectAssignment[]> {
   return new Promise((resolve) => {
-    if (projectTaskAssignmentCache && !forceFetch) {
-      resolve(projectTaskAssignmentCache);
+    if (projectAssignmentCache && !forceFetch) {
+      resolve(projectAssignmentCache);
     }
 
     const harvest = getHarvestSdk(config);
-    const taskAssignmentPromises: Array<Promise<Array<HarvestProjectTaskAssignment>>> = [];
 
-    harvest.projects.all().then((projects: Array<HarvestProject>) => {
-      projects.forEach((project) => {
-        taskAssignmentPromises.push(harvest.projects.pipe(project.id).task_assignments.all());
+    harvest.users
+      .pipe('me')
+      .project_assignments.all()
+      .then((projectAssignments: HarvestProjectAssignment[]) => {
+        projectAssignmentCache = projectAssignments;
+        resolve(projectAssignmentCache);
       });
+  });
+}
 
-      Promise.all(taskAssignmentPromises).then((taskAssignmentLists) => {
-        let collectedTaskAssignments: Array<HarvestProjectTaskAssignment> = [];
-        for (const taskAssignments of taskAssignmentLists) {
-          collectedTaskAssignments = collectedTaskAssignments.concat(taskAssignments);
-        }
-        projectTaskAssignmentCache = collectedTaskAssignments;
-        resolve(projectTaskAssignmentCache);
-      });
-    });
+export async function getMyProjectTaskAssignments(
+  config: Config,
+  forceFetch = false,
+): Promise<Array<HarvestProjectTaskAssignment>> {
+  return new Promise(async (resolve) => {
+    if (projectTaskAssignmentCache && !forceFetch) {
+      resolve(projectTaskAssignmentCache);
+    }
+    const projectAssignments = await getMyProjectAssignments(config, forceFetch);
+    let projectTaskAssignments: HarvestProjectTaskAssignment[] = [];
+    for (const projectAssignment of projectAssignments) {
+      for (const taskAssignments of projectAssignment.task_assignments) {
+        projectTaskAssignments.push({
+          project: projectAssignment.project,
+          task: taskAssignments.task,
+        });
+      }
+    }
+    projectTaskAssignmentCache = projectTaskAssignments;
+    resolve(projectTaskAssignmentCache);
   });
 }

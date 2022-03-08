@@ -2,20 +2,43 @@ import fs from 'fs';
 import Harvest from 'node-harvest-api';
 import { createInterface as createReadlineInterface } from 'readline';
 import path from 'path';
-import { homedir } from 'os';
+import { transformPath } from '../helper';
+import { XlsxFileParserConfig } from '../parser/file-parser/xlsx-file-parser';
+import { CsvFileParserConfig } from '../parser/file-parser/csv-file-parser';
 
-// TODO add proto config, and add alias file path
 export interface Config {
   accountId: string;
   accessToken: string;
+  aliasFilePath: string;
+  fileParser: FileParserConfig;
+  harvestSubdomain?: string;
 }
+
+export interface FileParserConfig {
+  type: string;
+  config: XlsxFileParserConfig | CsvFileParserConfig; //TODO
+}
+
+const defaultConfig: Config = {
+  accountId: '',
+  accessToken: '',
+  aliasFilePath: '~/.config/harvey/aliases.json',
+  fileParser: {
+    type: 'xlsx',
+    config: {
+      worksheet: 'Timebooking',
+      aliasColumn: 'Link',
+      minutesColumn: 'Minutes',
+    },
+  },
+};
 
 export function configFileExists(filePath: string): boolean {
   filePath = transformPath(filePath);
   return fs.existsSync(filePath);
 }
 
-export async function testConfig(config: Config): Promise<boolean> {
+export async function testNewConfigsHarvestCreds(config: Config): Promise<boolean> {
   const harvest = new Harvest(config.accountId, config.accessToken, 'harvey');
 
   return new Promise((resolve) => {
@@ -30,7 +53,7 @@ export async function testConfig(config: Config): Promise<boolean> {
 
 export async function initializeConfig(filePath: string): Promise<void> {
   const newConfig: Config = await askForConfigParameters();
-  const configIsValid = await testConfig(newConfig);
+  const configIsValid = await testNewConfigsHarvestCreds(newConfig);
 
   if (!configIsValid) {
     process.stdout.write('Could not authenticate, please try again.\n');
@@ -54,16 +77,13 @@ function writeConfigFile(config: Config, filePath: string): void {
   if (!fs.existsSync(path.dirname(filePath))) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
   }
-  fs.writeFileSync(filePath, JSON.stringify(config), 'utf8');
+  fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf8');
   process.stdout.write(`Sucessfully generated config ${filePath}\n`);
 }
 
 async function askForConfigParameters(): Promise<Config> {
   return new Promise((resolve) => {
-    const config: Config = {
-      accountId: '',
-      accessToken: '',
-    };
+    const config: Config = defaultConfig;
 
     const rl = createReadlineInterface({
       input: process.stdin,
@@ -79,8 +99,4 @@ async function askForConfigParameters(): Promise<Config> {
       });
     });
   });
-}
-
-function transformPath(path: string): string {
-  return path.replace('~', homedir());
 }

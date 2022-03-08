@@ -6,7 +6,6 @@ import { handleError } from '../error';
 
 type Options = {
   config: string;
-  aliases: string;
   alias: string;
 };
 
@@ -17,16 +16,15 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
-      aliases: { type: 'string', alias: 'a', default: '~/.config/harvey/aliases.json' },
     })
     .positional('alias', { type: 'string', demandOption: true });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const { config, alias, aliases } = argv;
+  const { config, alias } = argv;
 
   try {
     const configuration: Config = readConfigFile(config);
-    await addAlias(alias, configuration, aliases);
+    await addAlias(alias, configuration);
   } catch (error) {
     handleError(error);
     process.exit(1);

@@ -1,3 +1,4 @@
+import { homedir } from 'os';
 import { HarveyError } from '../error';
 
 export function convertDateInputToISODate(dateInput?: string): string {
@@ -16,4 +17,8 @@ export function convertMinuteTimeInputToHours(minuteInput: number): number {
   }
 
   return minuteInput / 60;
+}
+
+export function transformPath(path: string): string {
+  return path.replace('~', homedir());
 }

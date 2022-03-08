@@ -15,11 +15,19 @@ interface HarvestTask {
 }
 
 interface HarvestProjectTaskAssignment {
-  id: number;
-  name: string;
-  is_active: boolean;
   task: HarvestTask;
   project: HarvestProject;
+}
+
+interface HarvestProjectAssignment {
+  id: number;
+  project: HarvestProject;
+  task_assignments: HarvestTaskAssignment[];
+}
+
+interface HarvestTaskAssignment {
+  id: number;
+  task: HarvestTask;
 }
 
 interface HarvestTimeEntry {

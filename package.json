@@ -1,7 +1,7 @@
 {
   "name": "@simonrauch/harvey",
   "version": "2.0.0",
-  "description": "CLI to work with Harvest.",
+  "description": "A simple CLI for Harvest.",
   "bin": {
     "harvey": "./build/cli.js"
   },
@@ -23,11 +23,13 @@
     "scripts": "build/**/*.js"
   },
   "keywords": [
-    "harvest"
+    "harvest",
+    "cli"
   ],
   "author": "Simon Rauch <sr@simonrauch.com>",
   "license": "MIT",
   "dependencies": {
+    "exceljs": "^4.3.0",
     "node-harvest-api": "^1.0.6",
     "yargs": "^17.3.1"
   },

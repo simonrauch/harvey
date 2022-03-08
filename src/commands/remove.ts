@@ -1,9 +1,10 @@
 import type { Arguments, CommandBuilder } from 'yargs';
 import { removeAlias } from '../alias';
+import { Config, readConfigFile } from '../config';
 import { handleError } from '../error';
 
 type Options = {
-  aliases: string;
+  config: string;
   alias: string;
 };
 
@@ -13,15 +14,16 @@ export const desc = 'Removes reference to a task.';
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
-      aliases: { type: 'string', alias: 'a', default: '~/.config/harvey/aliases.json' },
+      config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
     })
     .positional('alias', { type: 'string', demandOption: true });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const { alias, aliases } = argv;
+  const { alias, config } = argv;
 
   try {
-    await removeAlias(alias, aliases);
+    const configuration: Config = readConfigFile(config);
+    await removeAlias(alias, configuration);
   } catch (error) {
     handleError(error);
     process.exit(1);

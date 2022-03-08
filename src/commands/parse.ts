@@ -5,16 +5,16 @@ import { readConfigFile } from '../config';
 import { handleError } from '../error';
 import { bookTimeEntry } from '../harvest';
 import { convertDateInputToISODate, convertMinuteTimeInputToHours } from '../helper';
+import { parseFileAndBookEntries } from '../parser';
 
 type Options = {
   config: string;
-  alias: string;
   note: string;
   date: string;
-  minutes: number;
+  file: string;
 };
 
-export const command = 'book <alias> <minutes>';
+export const command = 'parse <file>';
 export const desc = 'Creates a harvest time entry.';
 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
@@ -24,23 +24,14 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       note: { type: 'string', alias: 'n', default: '' },
       date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
     })
-    .positional('alias', { type: 'string', demandOption: true })
-    .positional('minutes', { type: 'number', demandOption: true });
+    .positional('file', { type: 'string', demandOption: true });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const { config, alias, note, date, minutes } = argv;
+  const { config, file, note, date } = argv;
 
   try {
     const configuration: Config = readConfigFile(config);
-    const harvestAlias = await getAliasOrCreate(alias, configuration);
-    const timeEntry: HarvestTimeEntry = {
-      task_id: harvestAlias.idTask,
-      project_id: harvestAlias.idProject,
-      hours: convertMinuteTimeInputToHours(minutes),
-      notes: note,
-      spent_date: convertDateInputToISODate(date),
-    };
-    await bookTimeEntry(timeEntry, configuration);
+    await parseFileAndBookEntries(file, convertDateInputToISODate(date), note, configuration);
   } catch (error) {
     handleError(error);
     process.exit(1);
