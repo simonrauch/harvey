@@ -42,7 +42,7 @@ jobs:
         run: |
           echo ::set-output name=sha::"$(shasum -a 256 ./build/macos-x64/harvey-macos-x64.tar.gz | awk '{printf $1}')"
       - name: Upload release asset 
-        uses: action/upload-release-asset@v1
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./build/macos-x64/harvey-macos-x64.tar.gz
