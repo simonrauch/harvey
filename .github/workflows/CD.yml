@@ -36,12 +36,12 @@ jobs:
       - name: Build MacOS binary 
         run: npm run pkg:macos-x64
       - name: Compress MacOS binary
-        run: tar -cvzf ./harvey-macos-x64.tar.gz ./pkg/macos-x64/harvey
+        run: cd ./pkg/macos-x64 && tar -cvzf ./harvey-macos-x64.tar.gz ./harvey && cd ../..
       - name: Upload release asset 
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./harvey-macos-x64.tar.gz
+          asset_path: ./pkg/macos-x64/harvey-macos-x64.tar.gz
           asset_name: harvey-macos-x64.tar.gz
           asset_content_type: application/gzip
         env: 
