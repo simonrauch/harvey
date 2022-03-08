@@ -36,7 +36,7 @@ jobs:
       - name: Build MacOS binary 
         run: npm run pkg:macos-x64
       - name: Compress MacOS binary
-      - run: tar -cvzf ./build/macos-x64/harvey-macos-x64.tar.gz ./build/macos-x64/harvey
+        run: tar -cvzf ./build/macos-x64/harvey-macos-x64.tar.gz ./build/macos-x64/harvey
       - name: Set SHA
         id: shasum
         run: |
