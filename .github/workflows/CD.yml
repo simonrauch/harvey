@@ -1,0 +1,52 @@
+name: CD
+on:
+  release:
+    types: [created]
+jobs:
+  npm-publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '17.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install 
+        run: npm ci
+      - name: Publish 
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  homebrew-publish:
+    name: Publish to Homebrew
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '17.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install 
+        run: npm ci
+      - name: Build MacOS binary 
+        run: npm run pkg:macos-x64
+      - name: Compress MacOS binary
+      - run: tar -cvzf ./build/macos-x64/harvey-macos-x64.tar.gz ./build/macos-x64/harvey
+      - name: Set SHA
+        id: shasum
+        run: |
+          echo ::set-output name=sha::"$(shasum -a 256 ./build/macos-x64/harvey-macos-x64.tar.gz | awk '{printf $1}')"
+      - name: Upload release asset 
+        uses: action/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./build/macos-x64/harvey-macos-x64.tar.gz
+          asset_name: harvey-macos-x64.tar.gz
+          asset_content_type: application/gzip
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
