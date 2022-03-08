@@ -51,7 +51,7 @@ jobs:
         run: |
           printf "::set-output name=%s::%s\n" tag-name "${GITHUB_REF#refs/tags/}"
       - name: Bump Homebrew formula
-      - uses: mislav/bump-homebrew-formula-action@v1
+        uses: mislav/bump-homebrew-formula-action@v1
         if: "!contains(github.ref, '-')" # skip prereleases
         with:
           formula-name: harvey
