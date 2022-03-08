@@ -57,7 +57,7 @@ jobs:
           formula-name: harvey
           formula-path: Formula/harvey.rb
           homebrew-tap: simonrauch/homebrew-tap
-          base-branch: master
+          base-branch: main
           download-url: https://github.com/simonrauch/harvey/releases/download/${{ steps.extract-version.outputs.tag-name }}/harvey-macos-x64.tar.gz
           commit-message: |
             {{formulaName}} {{version}}
