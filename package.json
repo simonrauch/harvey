@@ -1,6 +1,6 @@
 {
   "name": "@simonrauch/harvey",
-  "version": "2.1.16",
+  "version": "2.2.0",
   "description": "A simple CLI for Harvest.",
   "bin": {
     "harvey": "./build/cli.js"
