@@ -19,7 +19,7 @@ jobs:
           printf "::set-output name=%s::%s\n" tag "${GITHUB_REF#refs/tags/}"
       - name: 'Extract previous version'
         id: extract-previous-version
-        run: echo "::set-output name=previous-tag::$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=2 --max-count=1))"
+        run: echo "::set-output name=previous-tag::$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
       - name: Release
         id: create-release
         uses: actions/create-release@v1
