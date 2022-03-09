@@ -3,6 +3,7 @@ import { Config } from '../config';
 import { HarveyError } from '../error';
 import { getRunningTimer, restartTimer, saveTimer, stopTimer } from '../harvest';
 import { deleteFile, formatTimerHours, readFromJsonFile, writeToJsonFile } from '../helper';
+import Table from 'cli-table';
 
 export async function printTimerStatus(config: Config): Promise<void> {
   return new Promise(async (resolve) => {
@@ -27,30 +28,31 @@ export async function printTimerStatus(config: Config): Promise<void> {
 export async function pauseActiveTimer(config: Config): Promise<void> {
   return new Promise(async (resolve) => {
     const activeTimer = await getRunningTimer(config);
-    if (activeTimer) {
-      const stoppedTimer = await stopTimer(activeTimer, config);
-      writeToJsonFile(stoppedTimer, config.pausedTimerFilePath);
-      resolve();
+    if (!activeTimer) {
+      throw new HarveyError('No active timer to pause.');
     }
-    throw new HarveyError('No active timer to pause.');
+    const stoppedTimer = await stopTimer(activeTimer, config);
+    writeToJsonFile(stoppedTimer, config.pausedTimerFilePath);
+    resolve();
   });
 }
 
 export function resumePausedTimer(config: Config): Promise<void> {
   return new Promise(async (resolve) => {
     const activeTimer = await getRunningTimer(config);
+    const pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
+    if (!activeTimer && !pausedTimer) {
+      throw new HarveyError('No paused timer to resume available.');
+    }
     if (activeTimer) {
       deleteFile(config.pausedTimerFilePath);
       resolve();
     }
-    const pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
     if (pausedTimer) {
       await restartTimer(pausedTimer, config);
       deleteFile(config.pausedTimerFilePath);
       resolve();
     }
-
-    throw new HarveyError('No paused timer to resume available.');
   });
 }
 
@@ -107,17 +109,21 @@ export function stopRunningTimer(config: Config): Promise<void> {
 }
 
 function formatTimeEntry(status: string, timeEntry?: HarvestTimeEntry): string {
-  let formattedString = `Status: ${status.toUpperCase()}\n`;
-  if (timeEntry) {
-    formattedString += `Timer: ${formatTimerHours(timeEntry.hours)}\n`;
-    if (timeEntry.notes) {
-      formattedString += `Notes: ${timeEntry.notes}\n`;
-    }
-    formattedString += `Date: ${timeEntry.spent_date}\n`;
-    formattedString += `Task: ${timeEntry.task?.name}\n`;
-    formattedString += `Project: ${timeEntry.project?.name}\n`;
+  let tableHead: string[] = ['Status'];
+  let colWidth: number[] = [9];
+  let tableRow: string[] = [status];
+  if (timeEntry && timeEntry.task) {
+    tableHead = tableHead.concat(['Task', 'Notes', 'Timer']);
+    colWidth = colWidth.concat([44, 20, 7]);
+    tableRow = tableRow.concat([timeEntry.task.name, (timeEntry.notes ??= ''), formatTimerHours(timeEntry.hours)]);
   }
-  return formattedString;
+
+  const table = new Table({
+    head: tableHead,
+    colWidths: colWidth,
+  });
+  table.push(tableRow);
+  return table.toString() + '\n';
 }
 
 function getPausedTimer(config: Config): HarvestTimeEntry | null {

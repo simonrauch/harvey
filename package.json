@@ -30,11 +30,13 @@
   "author": "Simon Rauch <sr@simonrauch.com>",
   "license": "MIT",
   "dependencies": {
+    "cli-table": "^0.3.11",
     "exceljs": "^4.3.0",
     "node-harvest-api": "^1.0.6",
     "yargs": "^17.3.1"
   },
   "devDependencies": {
+    "@types/cli-table": "^0.3.0",
     "@types/filesystem": "^0.0.32",
     "@types/node": "^17.0.21",
     "@types/yargs": "^17.0.8",

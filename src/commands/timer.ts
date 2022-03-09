@@ -49,18 +49,23 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
           throw new HarveyError('<alias> is required to start a timer.');
         }
         await startTimer(alias, convertDateInputToISODate(date), note, configuration);
+        await printTimerStatus(configuration);
         break;
       case 'stop':
         await stopRunningTimer(configuration);
+        await printTimerStatus(configuration);
         break;
       case 'pause':
         await pauseActiveTimer(configuration);
+        await printTimerStatus(configuration);
         break;
       case 'resume':
         await resumePausedTimer(configuration);
+        await printTimerStatus(configuration);
         break;
       case 'update':
         await updateTimer(convertDateInputToISODate(date), note, configuration);
+        await printTimerStatus(configuration);
         break;
       case 'status':
         await printTimerStatus(configuration);
