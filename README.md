@@ -50,9 +50,9 @@ harvey timer --help
 
 To modify time entries on Harvest, we need to specify which project and task they are reffering to. To make this easier Harvey creates aliases and saves them to a file (default: `~/.config/harvey/aliases.json`). The alias is typically a unique substring of the tasks name, like a Jira issue reference. For the most part Harvey will manage those aliases automatically, but you can modify them, by using the following commands:
 
-  - `harvey add <alias>` will create an alias, by searching all available tasks on Harvest for `<alias>`.
-  - `harvey remove <alias>` will remove the alias.
-  - `harvey remove-all` will remove all aliases from your aliases file.
+  - `harvey alias add <alias>` will create an alias, by searching all available tasks on Harvest for `<alias>`.
+  - `harvey alias remove <alias>` will remove the alias.
+  - `harvey alias remove-all` will remove all aliases from your aliases file.
 
 ### Booking
 
