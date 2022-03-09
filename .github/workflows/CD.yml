@@ -5,6 +5,7 @@ on:
       - 'v*'
 jobs:
   release:
+    name: Create release
     runs-on: ubuntu-latest
     outputs:
       tag-name: ${{ steps.extract-version.outputs.tag-name }}
