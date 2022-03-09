@@ -29,7 +29,7 @@ jobs:
           release_name: ${{ steps.extract-version.outputs.tag }}
           tag_name: ${{ steps.extract-version.outputs.tag }}
           body: | 
-            **Full Changelog**: https://github.com/simonrauch/harvey/compare/${{ steps.extract-pervious-version.outputs.tag }}...${{ steps.extract-version.outputs.tag }}
+            **Full Changelog**: https://github.com/simonrauch/harvey/compare/${{ steps.extract-previous-version.outputs.tag }}...${{ steps.extract-version.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
   npm-publish:
