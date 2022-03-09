@@ -26,7 +26,7 @@ After harvey is installed, you have to initialize your configuration, by running
 harvey init
 ```
 
-You'll be asked for your Harvest account ID and personal access token, so you'll have to create one in the [Developers section on Harvest](https://id.getharvest.com/developers). Oauth
+You'll be asked for your Harvest account ID and personal access token, so you'll have to create one in the [Developers section on Harvest](https://id.getharvest.com/developers). 
 
 This will create a configuration file (default: `~/.config/harvey/config.json`).
 
