@@ -9,6 +9,7 @@ export interface Config {
   accessToken: string;
   aliasFilePath: string;
   pausedTimerFilePath: string;
+  defaultRoundingIncrement: number;
   fileParser: FileParserConfig;
   harvestSubdomain?: string;
 }
@@ -25,6 +26,7 @@ const defaultConfig: Config = {
   accessToken: '',
   aliasFilePath: '~/.config/harvey/aliases.json',
   pausedTimerFilePath: '~/.config/harvey/paused_timer.json',
+  defaultRoundingIncrement: 15,
   fileParser: {
     type: 'xlsx',
     worksheet: 'Timebooking',

@@ -1,6 +1,7 @@
 declare module 'node-harvest-api';
 
 interface HarvestUser {
+  id: number;
   first_name: string;
 }
 

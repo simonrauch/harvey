@@ -6,6 +6,7 @@ import { resolve } from 'path/posix';
 
 let projectTaskAssignmentCache: Array<HarvestProjectTaskAssignment>;
 let projectAssignmentCache: Array<HarvestProjectAssignment>;
+let authenticatedUserIdCache: number;
 let harvestSdk: any;
 
 export function getHarvestSdk(config: Config): any {
@@ -70,19 +71,21 @@ export async function getMyProjectTaskAssignments(
 }
 
 export async function getRunningTimer(config: Config): Promise<HarvestTimeEntry | null> {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const harvest = getHarvestSdk(config);
-    harvest.time_entries.get({ is_running: true }).then((timeEntries: HarvestTimeEntry[]) => {
-      if (timeEntries.length > 1) {
-        throw new HarveyError(
-          'You somehow managed to start multiple timers. Only one timer should be running. Please stop them and restart only the correct one.',
-        );
-      }
-      if (timeEntries[0]) {
-        resolve(timeEntries[0]);
-      }
-      resolve(null);
-    });
+    harvest.time_entries
+      .get({ is_running: true, user_id: await getAuthenticatedUserId(config) })
+      .then((timeEntries: HarvestTimeEntry[]) => {
+        if (timeEntries.length > 1) {
+          throw new HarveyError(
+            'You somehow managed to start multiple timers. Only one timer should be running. Please stop them and restart only the correct one.',
+          );
+        }
+        if (timeEntries[0]) {
+          resolve(timeEntries[0]);
+        }
+        resolve(null);
+      });
   });
 }
 export async function saveTimer(timer: HarvestTimeEntry, config: Config): Promise<HarvestTimeEntry> {
@@ -114,5 +117,23 @@ export async function restartTimer(timer: HarvestTimeEntry, config: Config): Pro
     } else {
       resolve(timer);
     }
+  });
+}
+export async function getAuthenticatedUserId(config: Config): Promise<number> {
+  return new Promise((resolve) => {
+    if (authenticatedUserIdCache) {
+      resolve(authenticatedUserIdCache);
+    }
+    const harvest = getHarvestSdk(config);
+    harvest.users.me().then((user: HarvestUser) => {
+      authenticatedUserIdCache = user.id;
+      resolve(authenticatedUserIdCache);
+    });
+  });
+}
+export async function getMyTimeEntriesPerDate(date: string, config: Config): Promise<HarvestTimeEntry[]> {
+  return new Promise(async (resolve) => {
+    const harvest = getHarvestSdk(config);
+    harvest.time_entries.get({ from: date, to: date, user_id: await getAuthenticatedUserId(config) }).then(resolve);
   });
 }

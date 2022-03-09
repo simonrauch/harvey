@@ -2,8 +2,7 @@ import type { Arguments, CommandBuilder } from 'yargs';
 import type { Config } from '../config';
 import { readConfigFile } from '../config';
 import { handleError, HarveyError } from '../error';
-import { stopTimer } from '../harvest';
-import { convertDateInputToISODate, convertMinuteTimeInputToHours } from '../helper';
+import { convertDateInputToISODate } from '../helper';
 import {
   pauseActiveTimer,
   printTimerStatus,
