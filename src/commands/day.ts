@@ -13,7 +13,7 @@ type Options = {
 };
 
 export const command = 'day [<action>]';
-export const desc = 'Controls a timer.';
+export const desc = 'Controls the time entries of a day.';
 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
