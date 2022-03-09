@@ -11,7 +11,7 @@ type Options = {
 };
 
 export const command = 'alias <action> [<alias>]';
-export const desc = 'Searches all active harvest tasks names for the alias and will store a reference.';
+export const desc = 'Manages Harvey aliases.';
 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
