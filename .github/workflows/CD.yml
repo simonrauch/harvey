@@ -8,23 +8,28 @@ jobs:
     name: Create release
     runs-on: ubuntu-latest
     outputs:
-      tag-name: ${{ steps.extract-version.outputs.tag-name }}
+      tag: ${{ steps.extract-version.outputs.tag }}
       release-upload-url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Extract Version
+      - name: Extract version
         id: extract-version
         run: |
-          printf "::set-output name=%s::%s\n" tag-name "${GITHUB_REF#refs/tags/}"
+          printf "::set-output name=%s::%s\n" tag "${GITHUB_REF#refs/tags/}"
+      - name: 'Extract previous version'
+        id: extract-previous-version
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
       - name: release
         id: create-release
         uses: actions/create-release@v1
         with:
           draft: false
           prerelease: false
-          release_name: ${{ steps.extract-version.outputs.tag-name }}
-          tag_name: ${{ steps.extract-version.outputs.tag-name }}
+          release_name: ${{ steps.extract-version.outputs.tag }}
+          tag_name: ${{ steps.extract-version.outputs.tag }}
+          body: | 
+            **Full Changelog**: https://github.com/simonrauch/harvey/compare/${{ steps.extract-pervious-version.outputs.tag }}...${{ steps.extract-version.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
   npm-publish:
@@ -79,7 +84,7 @@ jobs:
           formula-path: Formula/harvey.rb
           homebrew-tap: simonrauch/homebrew-tap
           base-branch: main
-          download-url: https://github.com/simonrauch/harvey/releases/download/${{ needs.release.outputs.tag-name }}/harvey-macos-x64.tar.gz
+          download-url: https://github.com/simonrauch/harvey/releases/download/${{ needs.release.outputs.tag }}/harvey-macos-x64.tar.gz
           commit-message: |
             {{formulaName}} {{version}}
         env:
