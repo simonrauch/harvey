@@ -12,7 +12,7 @@ type Options = {
   rounding_increment?: number;
 };
 
-export const command = 'day <action>';
+export const command = 'day [<action>]';
 export const desc = 'Controls a timer.';
 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
@@ -24,7 +24,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     })
     .positional('action', {
       type: 'string',
-      demandOption: true,
+      default: 'status',
       choices: ['status', 'round'],
     });
 

@@ -20,7 +20,7 @@ type Options = {
   action: string;
 };
 
-export const command = 'timer <action> [<alias>]';
+export const command = 'timer [<action>] [<alias>]';
 export const desc = 'Controls a timer.';
 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
@@ -33,7 +33,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .positional('alias', { type: 'string', demandOption: false })
     .positional('action', {
       type: 'string',
-      demandOption: true,
+      default: 'status',
       choices: ['start', 'stop', 'pause', 'resume', 'update', 'status'],
     });
 
