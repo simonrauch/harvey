@@ -21,7 +21,7 @@ jobs:
           printf "::set-output name=%s::%s\n" tag "${GITHUB_REF#refs/tags/}"
       - name: 'Extract previous version'
         id: extract-previous-version
-        run: echo "::set-output name=previous-tag::$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
       - name: Release
         id: create-release
         uses: actions/create-release@v1
@@ -31,7 +31,7 @@ jobs:
           release_name: ${{ steps.extract-version.outputs.tag }}
           tag_name: ${{ steps.extract-version.outputs.tag }}
           body: | 
-            **Full Changelog**: https://github.com/simonrauch/harvey/compare/${{ steps.extract-previous-version.outputs.previous-tag }}...${{ steps.extract-version.outputs.tag }}
+            **Full Changelog**: https://github.com/simonrauch/harvey/compare/${{ steps.extract-previous-version.outputs.tag }}...${{ steps.extract-version.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
   npm-publish:
