@@ -44,6 +44,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
           configuration,
         );
         await printDay(convertDateInputToISODate(date), configuration);
+        break;
       case 'modify':
         await modifyDay(
           convertDateInputToISODate(date),

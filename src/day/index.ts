@@ -3,7 +3,6 @@ import { deleteTimeEntry, getMyTimeEntriesPerDate, saveTimer as saveTimeEntry } 
 import Table from 'cli-table';
 import { formatTimerHours } from '../helper';
 import { createInterface as createReadlineInterface } from 'readline';
-import { HarveyError } from '../error';
 
 export async function printDay(date: string, config: Config): Promise<void> {
   return new Promise(async (resolve) => {
