@@ -2,6 +2,11 @@
 
 - check timezone
 
+## timer command
+
+- add rounding option to stop action
+- add options to add or subtract time from current timer
+
 ## date inputs
 
 - check if date inputs are valid
