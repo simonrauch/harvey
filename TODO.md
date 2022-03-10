@@ -15,6 +15,11 @@
 - check auth after loading config
 - store authenticated user id after check
 
+## codebase
+
+- check style linters and integrate into ci pipeline
+- tests
+
 ## add oauth authentication
 
 - keep option to auth with PAT
