@@ -1,3 +1,7 @@
+## docs
+
+- document 'day' command in readme
+
 ## day command
 
 - delete entries
