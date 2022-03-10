@@ -1,5 +1,5 @@
 import { Config } from '../config';
-import { getMyTimeEntriesPerDate, saveTimer as saveTimeEntry } from '../harvest';
+import { deleteTimeEntry, getMyTimeEntriesPerDate, saveTimer as saveTimeEntry } from '../harvest';
 import Table from 'cli-table';
 import { formatTimerHours } from '../helper';
 import { createInterface as createReadlineInterface } from 'readline';
@@ -79,8 +79,7 @@ async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: n
           await roundAndSaveTimeEntry(timeEntry, roundingIncrement, config);
           resolve();
         } else if (modifyAction == 'd' || modifyAction == 'delete') {
-          //TODO
-          throw new HarveyError('Deleting is not yet implemented.');
+          await deleteTimeEntry(timeEntry, config);
           resolve();
         } else {
           process.stdout.write(`"${modifyAction}" is not a valid option.\n`);

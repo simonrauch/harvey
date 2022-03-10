@@ -135,3 +135,12 @@ export async function getMyTimeEntriesPerDate(date: string, config: Config): Pro
     harvest.time_entries.get({ from: date, to: date, user_id: await getAuthenticatedUserId(config) }).then(resolve);
   });
 }
+export async function deleteTimeEntry(timeEntry: HarvestTimeEntry, config: Config): Promise<void> {
+  return new Promise(async (resolve) => {
+    const harvest = getHarvestSdk(config);
+    if (!timeEntry.id) {
+      throw new Error('id property has to be set, to delete a time entry.');
+    }
+    harvest.time_entries.delete(timeEntry.id).then(resolve);
+  });
+}
