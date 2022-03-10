@@ -7,6 +7,10 @@
 - delete entries
 - check timezone
 
+## date inputs
+
+- check if date inputs are valid
+
 ## enter time in different format
 
 - check if `:` is present in entered string and parse accordingly
