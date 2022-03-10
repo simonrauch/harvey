@@ -1,10 +1,6 @@
-## docs
-
-- document 'day' command in readme
-
 ## day command
 
-- delete entries
+- document 'day' command in readme
 - check timezone
 
 ## date inputs
