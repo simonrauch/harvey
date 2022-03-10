@@ -120,7 +120,7 @@ This command also accepts the `-r` flag.
 
 To track the time of the task you're working on you can use the `harvey timer` commands:
 
-  - `harvey timer status` will show you the status of the current timer.
+  - `harvey timer` or `harvey timer status` will show you the status of the current timer.
   - `harvey timer start <alias>` will start a timer.
     Similar to the `harvey book` command you can also specify the `-d` and `-n` options, to define the time entries notes and date.
   - `harvey timer pause` will pause the currently running timer.
