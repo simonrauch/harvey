@@ -9,7 +9,7 @@ type Options = {
   config: string;
   date: string;
   action: string;
-  rounding_increment?: number;
+  rounding_interval?: number;
 };
 
 export const command = 'day [<action>]';
@@ -20,7 +20,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .options({
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
       date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
-      rounding_increment: { type: 'number', alias: 'r' },
+      rounding_interval: { type: 'number', alias: 'r' },
     })
     .positional('action', {
       type: 'string',
@@ -29,7 +29,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const { config, date, action, rounding_increment } = argv;
+  const { config, date, action, rounding_interval } = argv;
 
   try {
     const configuration: Config = readConfigFile(config);
@@ -40,14 +40,14 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
       case 'round':
         await roundDay(
           convertDateInputToISODate(date),
-          rounding_increment ?? configuration.defaultRoundingIncrement,
+          rounding_interval ?? configuration.defaultRoundingInterval,
           configuration,
         );
         await printDay(convertDateInputToISODate(date), configuration);
       case 'modify':
         await modifyDay(
           convertDateInputToISODate(date),
-          rounding_increment ?? configuration.defaultRoundingIncrement,
+          rounding_interval ?? configuration.defaultRoundingInterval,
           configuration,
         );
         await printDay(convertDateInputToISODate(date), configuration);

@@ -31,33 +31,33 @@ function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {
   );
 }
 
-export async function roundDay(date: string, roundingIncrement: number, config: Config): Promise<void> {
+export async function roundDay(date: string, roundingInterval: number, config: Config): Promise<void> {
   return new Promise(async (resolve) => {
     const timeEntries = await getMyTimeEntriesPerDate(date, config);
     let updatePromises: Promise<HarvestTimeEntry>[] = [];
     timeEntries.forEach((timeEntry) => {
-      timeEntry = roundTimeEntry(timeEntry, roundingIncrement);
+      timeEntry = roundTimeEntry(timeEntry, roundingInterval);
       updatePromises.push(saveTimeEntry(timeEntry, config));
     });
     Promise.all(updatePromises).then(() => resolve());
   });
 }
-function roundTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: number): HarvestTimeEntry {
+function roundTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number): HarvestTimeEntry {
   const minutes = timeEntry.hours * 60;
-  timeEntry.hours = (Math.ceil(minutes / roundingIncrement) * roundingIncrement) / 60;
+  timeEntry.hours = (Math.ceil(minutes / roundingInterval) * roundingInterval) / 60;
   return timeEntry;
 }
-export async function modifyDay(date: string, roundingIncrement: number, config: Config): Promise<void> {
+export async function modifyDay(date: string, roundingInterval: number, config: Config): Promise<void> {
   return new Promise(async (resolve) => {
     const timeEntries = await getMyTimeEntriesPerDate(date, config);
     printTimeEntryTable(timeEntries);
     const timeEntry = await chooseModifyTimeEntry(timeEntries);
-    await modifyTimeEntry(timeEntry, roundingIncrement, config);
+    await modifyTimeEntry(timeEntry, roundingInterval, config);
     resolve();
   });
 }
 
-async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: number, config: Config): Promise<void> {
+async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number, config: Config): Promise<void> {
   return new Promise((resolve) => {
     const rl = createReadlineInterface({
       input: process.stdin,
@@ -76,14 +76,14 @@ async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: n
           await setNewTimeEntryNote(timeEntry, config);
           resolve();
         } else if (modifyAction == 'r' || modifyAction == 'round') {
-          await roundAndSaveTimeEntry(timeEntry, roundingIncrement, config);
+          await roundAndSaveTimeEntry(timeEntry, roundingInterval, config);
           resolve();
         } else if (modifyAction == 'd' || modifyAction == 'delete') {
           await deleteTimeEntry(timeEntry, config);
           resolve();
         } else {
           process.stdout.write(`"${modifyAction}" is not a valid option.\n`);
-          resolve(await modifyTimeEntry(timeEntry, roundingIncrement, config));
+          resolve(await modifyTimeEntry(timeEntry, roundingInterval, config));
         }
       },
     );
@@ -92,11 +92,11 @@ async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: n
 
 async function roundAndSaveTimeEntry(
   timeEntry: HarvestTimeEntry,
-  roundingIncrement: number,
+  roundingInterval: number,
   config: Config,
 ): Promise<void> {
   return new Promise(async (resolve) => {
-    timeEntry = roundTimeEntry(timeEntry, roundingIncrement);
+    timeEntry = roundTimeEntry(timeEntry, roundingInterval);
     await saveTimeEntry(timeEntry, config);
     resolve();
   });
