@@ -32,7 +32,7 @@
   "dependencies": {
     "cli-table": "^0.3.11",
     "exceljs": "^4.3.0",
-    "node-harvest-api": "^1.0.6",
+    "node-harvest-api": "github:simonrauch/node-harvest-api",
     "yargs": "^17.3.1"
   },
   "devDependencies": {
