@@ -1,10 +1,10 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import { getAliasOrCreate } from '../alias';
-import type { Config } from '../config';
-import { readConfigFile } from '../config';
-import { handleError } from '../error';
-import { bookTimeEntry } from '../harvest';
-import { convertDateInputToISODate, convertMinuteTimeInputToHours } from '../helper';
+import { getAliasOrCreate } from '../business/alias';
+import type { Config } from '../business/config';
+import { readConfigFile } from '../business/config';
+import { handleError } from '../business/error';
+import { bookTimeEntry } from '../api/harvest';
+import { convertDateInputToISODate, convertMinuteTimeInputToHours } from '../business/helper';
 
 type Options = {
   config: string;

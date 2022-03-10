@@ -1,8 +1,8 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import type { Config } from '../config';
-import { readConfigFile } from '../config';
-import { handleError, HarveyError } from '../error';
-import { convertDateInputToISODate } from '../helper';
+import type { Config } from '../business/config';
+import { readConfigFile } from '../business/config';
+import { handleError, HarveyError } from '../business/error';
+import { convertDateInputToISODate } from '../business/helper';
 import {
   pauseActiveTimer,
   printTimerStatus,
@@ -10,7 +10,7 @@ import {
   startTimer,
   stopRunningTimer,
   updateTimer,
-} from '../timer';
+} from '../business/timer';
 
 type Options = {
   config: string;

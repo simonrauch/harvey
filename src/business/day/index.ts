@@ -1,5 +1,5 @@
 import { Config } from '../config';
-import { deleteTimeEntry, getMyTimeEntriesPerDate, saveTimer as saveTimeEntry } from '../harvest';
+import { deleteTimeEntry, getMyTimeEntriesPerDate, saveTimer as saveTimeEntry } from '../../api/harvest';
 import Table from 'cli-table';
 import { formatTimerHours } from '../helper';
 import { createInterface as createReadlineInterface } from 'readline';

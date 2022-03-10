@@ -1,6 +1,6 @@
-import type { Config } from '../config';
+import type { Config } from '../../business/config';
 import Harvest from 'node-harvest-api';
-import { HarveyError } from '../error';
+import { HarveyError } from '../../business/error';
 
 let projectTaskAssignmentCache: Array<HarvestProjectTaskAssignment>;
 let projectAssignmentCache: Array<HarvestProjectAssignment>;

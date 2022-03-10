@@ -1,7 +1,7 @@
 import { Alias, getAliasOrCreate } from '../alias';
 import { Config } from '../config';
 import { HarveyError } from '../error';
-import { bookTimeEntry } from '../harvest';
+import { bookTimeEntry } from '../../api/harvest';
 import { convertMinuteTimeInputToHours } from '../helper';
 import { CsvFileParser } from './file-parser/csv-file-parser';
 import { XlsxFileParser } from './file-parser/xlsx-file-parser';

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { createInterface as createReadlineInterface } from 'readline';
 import type { Config } from '../config';
-import { getMyProjectTaskAssignments } from '../harvest';
+import { getMyProjectTaskAssignments } from '../../api/harvest';
 import { HarveyError } from '../error';
 import { transformPath } from '../helper';
 

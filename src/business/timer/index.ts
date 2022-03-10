@@ -1,7 +1,7 @@
 import { getAliasOrCreate } from '../alias';
 import { Config } from '../config';
 import { HarveyError } from '../error';
-import { getRunningTimer, restartTimer, saveTimer, stopTimer } from '../harvest';
+import { getRunningTimer, restartTimer, saveTimer, stopTimer } from '../../api/harvest';
 import { deleteFile, formatTimerHours, readFromJsonFile, writeToJsonFile } from '../helper';
 import Table from 'cli-table';
 

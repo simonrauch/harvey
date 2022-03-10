@@ -1,9 +1,9 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import type { Config } from '../config';
-import { readConfigFile } from '../config';
-import { modifyDay, printDay, roundDay } from '../day';
-import { handleError } from '../error';
-import { convertDateInputToISODate } from '../helper';
+import type { Config } from '../business/config';
+import { readConfigFile } from '../business/config';
+import { modifyDay, printDay, roundDay } from '../business/day';
+import { handleError } from '../business/error';
+import { convertDateInputToISODate } from '../business/helper';
 
 type Options = {
   config: string;

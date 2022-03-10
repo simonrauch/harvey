@@ -1,8 +1,8 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import { addAlias, removeAlias, removeAllAliases } from '../alias';
-import type { Config } from '../config';
-import { readConfigFile } from '../config';
-import { handleError, HarveyError } from '../error';
+import { addAlias, removeAlias, removeAllAliases } from '../business/alias';
+import type { Config } from '../business/config';
+import { readConfigFile } from '../business/config';
+import { handleError, HarveyError } from '../business/error';
 
 type Options = {
   config: string;
