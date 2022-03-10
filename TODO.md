@@ -1,8 +1,6 @@
 ## day command
 
 - delete entries
-- change time
-- change notes
 - round
 - check timezone
 

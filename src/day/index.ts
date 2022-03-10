@@ -69,8 +69,7 @@ async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: n
           await setNewTimeEntryTime(timeEntry, config);
           resolve();
         } else if (modifyAction == 'n' || modifyAction == 'notes') {
-          //TODO
-          throw new HarveyError('Changing notes is not yet implemented.');
+          await setNewTimeEntryNote(timeEntry, config);
           resolve();
         } else if (modifyAction == 'r' || modifyAction == 'round') {
           //TODO
@@ -109,6 +108,21 @@ async function setNewTimeEntryTime(timeEntry: HarvestTimeEntry, config: Config):
         resolve(await setNewTimeEntryTime(timeEntry, config));
       }
       timeEntry.hours = hours;
+      await saveTimeEntry(timeEntry, config);
+      resolve();
+    });
+  });
+}
+
+async function setNewTimeEntryNote(timeEntry: HarvestTimeEntry, config: Config): Promise<void> {
+  return new Promise((resolve) => {
+    const rl = createReadlineInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    rl.question('Set new note : ', async (notes: string) => {
+      rl.close();
+      timeEntry.notes = notes;
       await saveTimeEntry(timeEntry, config);
       resolve();
     });
