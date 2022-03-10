@@ -36,12 +36,16 @@ export async function roundDay(date: string, roundingIncrement: number, config: 
     const timeEntries = await getMyTimeEntriesPerDate(date, config);
     let updatePromises: Promise<HarvestTimeEntry>[] = [];
     timeEntries.forEach((timeEntry) => {
-      const minutes = timeEntry.hours * 60;
-      timeEntry.hours = (Math.ceil(minutes / roundingIncrement) * roundingIncrement) / 60;
+      timeEntry = roundTimeEntry(timeEntry, roundingIncrement);
       updatePromises.push(saveTimeEntry(timeEntry, config));
     });
     Promise.all(updatePromises).then(() => resolve());
   });
+}
+function roundTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: number): HarvestTimeEntry {
+  const minutes = timeEntry.hours * 60;
+  timeEntry.hours = (Math.ceil(minutes / roundingIncrement) * roundingIncrement) / 60;
+  return timeEntry;
 }
 export async function modifyDay(date: string, roundingIncrement: number, config: Config): Promise<void> {
   return new Promise(async (resolve) => {
@@ -72,8 +76,7 @@ async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: n
           await setNewTimeEntryNote(timeEntry, config);
           resolve();
         } else if (modifyAction == 'r' || modifyAction == 'round') {
-          //TODO
-          throw new HarveyError('Rounding is not yet implemented.');
+          await roundAndSaveTimeEntry(timeEntry, roundingIncrement, config);
           resolve();
         } else if (modifyAction == 'd' || modifyAction == 'delete') {
           //TODO
@@ -85,6 +88,18 @@ async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingIncrement: n
         }
       },
     );
+  });
+}
+
+async function roundAndSaveTimeEntry(
+  timeEntry: HarvestTimeEntry,
+  roundingIncrement: number,
+  config: Config,
+): Promise<void> {
+  return new Promise(async (resolve) => {
+    timeEntry = roundTimeEntry(timeEntry, roundingIncrement);
+    await saveTimeEntry(timeEntry, config);
+    resolve();
   });
 }
 

@@ -1,7 +1,6 @@
 ## day command
 
 - delete entries
-- round
 - check timezone
 
 ## enter time in different format
