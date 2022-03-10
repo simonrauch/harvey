@@ -1,7 +1,7 @@
 import type { Arguments, CommandBuilder } from 'yargs';
 import type { Config } from '../config';
 import { readConfigFile } from '../config';
-import { printDay, roundDay } from '../day';
+import { modifyDay, printDay, roundDay } from '../day';
 import { handleError } from '../error';
 import { convertDateInputToISODate } from '../helper';
 
@@ -25,7 +25,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .positional('action', {
       type: 'string',
       default: 'status',
-      choices: ['status', 'round'],
+      choices: ['status', 'modify', 'round'],
     });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
@@ -39,6 +39,13 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         break;
       case 'round':
         await roundDay(
+          convertDateInputToISODate(date),
+          rounding_increment ?? configuration.defaultRoundingIncrement,
+          configuration,
+        );
+        await printDay(convertDateInputToISODate(date), configuration);
+      case 'modify':
+        await modifyDay(
           convertDateInputToISODate(date),
           rounding_increment ?? configuration.defaultRoundingIncrement,
           configuration,

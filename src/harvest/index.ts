@@ -1,8 +1,6 @@
 import type { Config } from '../config';
 import Harvest from 'node-harvest-api';
-import { time } from 'console';
 import { HarveyError } from '../error';
-import { resolve } from 'path/posix';
 
 let projectTaskAssignmentCache: Array<HarvestProjectTaskAssignment>;
 let projectAssignmentCache: Array<HarvestProjectAssignment>;
