@@ -114,7 +114,7 @@ If you want to round up all entries of a day, you can run:
 harvey day round
 ```
 
-This command also accepts the `-r` flag.
+This command also accepts the `-r` option.
 
 ### Timer
 
