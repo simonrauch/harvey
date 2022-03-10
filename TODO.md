@@ -1,6 +1,5 @@
 ## day command
 
-- document 'day' command in readme
 - check timezone
 
 ## date inputs

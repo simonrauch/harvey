@@ -70,6 +70,52 @@ Example:
 harvey book TEST-1234 45 -n "my comment" -d "2022-03-09"
 ```
 
+### Days time entries
+
+You can list a days time entries by running:
+
+```
+harvey day
+```
+
+or
+
+```
+harvey day status
+```
+
+You can specify the date for the entry by using the `-d` option. The date option will default to the current date.
+
+Example:
+
+```
+harvey day -d "2022-03-09"
+```
+
+#### Modifying a days entries
+
+To modify an entry you can run the following command and follow the prompts:
+
+```
+harvey day modify
+```
+
+One option is to round up an entry in a defined interval. The default interval is set in minutes in your config file (default: `~/.config/harvey/config.json`), but you can override this setting by passing the `-r` option to the command.
+
+Example:
+
+```
+harvey day modify -r 30
+```
+
+If you want to round up all entries of a day, you can run:
+
+```
+harvey day round
+```
+
+This command also accepts the `-r` flag.
+
 ### Timer
 
 To track the time of the task you're working on you can use the `harvey timer` commands:
