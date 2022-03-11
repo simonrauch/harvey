@@ -13,13 +13,7 @@ jobs:
     steps:
       - name: Extract version
         id: extract-version
-        uses: actions/github-script@v4
-        with:
-          script: |
-            const tag = context.ref.substring(10)
-            const no_v = tag.replace('v', '')
-            core.setOutput('version', tag)
-            core.setOutput('version-without-v', no_v)
+        uses: battila7/get-version-action@v2
       - name: Release
         id: create-release
         uses: actions/create-release@v1
@@ -50,7 +44,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   homebrew-publish:
     name: Publish to Homebrew
-    needs: npm-publish
+    needs: [release, npm-publish]
     runs-on: ubuntu-latest
     steps:
       - name: Bump Homebrew formula
