@@ -20,8 +20,9 @@
     "build": "rm -rf build; npx tsc",
     "dev": "rm -rf build; npx tsc --watch",
     "prepare": "husky install; npm run build",
-    "pkg:macos-x64": "pkg . --targets node17-macos-x64 --output pkg/macos-x64/harvey",
-    "pkg:linux-x64": "pkg . --targets node17-linux-x64 --output pkg/linux-x64/harvey"
+    "pkg:macos-x64": "pkg . --targets node17-macos-x64 --output harvey",
+    "pkg:macos-arm64": "pkg . --targets node17-macos-arm64 --output harvey",
+    "pkg:linux-x64": "pkg . --targets node17-linux-x64 --output harvey"
   },
   "pkg": {
     "scripts": "build/**/*.js"
