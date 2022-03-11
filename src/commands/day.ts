@@ -20,7 +20,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .options({
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
       date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
-      rounding_interval: { type: 'number', alias: 'r' },
+      rounding_interval: { type: 'number', alias: 'ri' },
     })
     .positional('action', {
       type: 'string',

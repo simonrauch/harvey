@@ -100,12 +100,12 @@ To modify an entry you can run the following command and follow the prompts:
 harvey day modify
 ```
 
-One option is to round up an entry in a defined interval. The default interval is set in minutes in your config file (default: `~/.config/harvey/config.json`), but you can override this setting by passing the `-r` option to the command.
+One option is to round up an entry in a defined interval. The default interval is set in minutes in your config file (default: `~/.config/harvey/config.json`), but you can override this setting by passing the `--ri` option to the command.
 
 Example:
 
 ```
-harvey day modify -r 30
+harvey day modify --ri 30
 ```
 
 If you want to round up all entries of a day, you can run:
@@ -114,7 +114,7 @@ If you want to round up all entries of a day, you can run:
 harvey day round
 ```
 
-This command also accepts the `-r` option.
+This command also accepts the `--ri` option.
 
 ### Timer
 
