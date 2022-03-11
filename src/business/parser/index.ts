@@ -37,34 +37,35 @@ export async function parseFileAndBookEntries(
   note: string,
   config: Config,
 ): Promise<void> {
-  return new Promise(async (resolve) => {
+  return new Promise((resolve) => {
     const fileParser = getFileParserByKey(config.fileParser.type);
-    const entries = await fileParser.parseFile(filePath, config);
-    await bookEntries(entries, date, note, config);
-    resolve();
+    fileParser.parseFile(filePath, config).then((entries) => {
+      bookEntries(entries, date, note, config).then(() => resolve());
+    });
   });
 }
 
 async function bookEntries(entries: ParserBookingEntry[], date: string, note: string, config: Config): Promise<void> {
-  return new Promise(async (resolve) => {
-    const aliases = await findAliases(entries, config);
-    const timeEntries = mapAliasesAndEntriesToHarvestTimeEntry(aliases, entries, date, note);
-    let timeEntryCreationPromises = [];
-    for (const timeEntry of timeEntries) {
-      timeEntryCreationPromises.push(bookTimeEntry(timeEntry, config));
-    }
-    Promise.all(timeEntryCreationPromises).then(() => {
-      resolve();
+  return new Promise((resolve) => {
+    findAliases(entries, config).then((aliases) => {
+      const timeEntries = mapAliasesAndEntriesToHarvestTimeEntry(aliases, entries, date, note);
+      const timeEntryCreationPromises = [];
+      for (const timeEntry of timeEntries) {
+        timeEntryCreationPromises.push(bookTimeEntry(timeEntry, config));
+      }
+      Promise.all(timeEntryCreationPromises).then(() => {
+        resolve();
+      });
     });
   });
 }
 
 async function findAliases(entries: ParserBookingEntry[], config: Config): Promise<Alias[]> {
-  return new Promise(async (resolve) => {
-    let aliases = [];
-    for (const entry of entries) {
-      aliases.push(await getAliasOrCreate(entry.alias, config));
-    }
+  const aliases: Alias[] = [];
+  for (const entry of entries) {
+    aliases.push(await getAliasOrCreate(entry.alias, config));
+  }
+  return new Promise((resolve) => {
     resolve(aliases);
   });
 }
@@ -74,7 +75,7 @@ function mapAliasesAndEntriesToHarvestTimeEntry(
   date: string,
   note: string,
 ): HarvestTimeEntry[] {
-  let harvestTimeEntries = [];
+  const harvestTimeEntries = [];
   for (const entry of entries) {
     const alias = aliases.find((alias) => {
       return alias.alias == entry.alias;

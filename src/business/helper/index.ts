@@ -37,15 +37,18 @@ export function fileExists(filePath: string): boolean {
   return fs.existsSync(filePath);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function readFromJsonFile(filePath: string): any {
   if (!fileExists(filePath)) {
     return null;
   }
+
   filePath = transformPath(filePath);
   return JSON.parse(fs.readFileSync(filePath).toString());
 }
 
-export function writeToJsonFile(content: any, filePath: string, pretty: boolean = false): void {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function writeToJsonFile(content: any, filePath: string, pretty = false): void {
   filePath = transformPath(filePath);
   if (!fs.existsSync(path.dirname(filePath))) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });

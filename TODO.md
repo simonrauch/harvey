@@ -22,7 +22,8 @@
 
 ## codebase
 
-- check style linters and integrate into ci pipeline
+- add ci action
+- add linting to ci action
 - tests
 
 ## add oauth authentication

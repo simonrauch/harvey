@@ -13,10 +13,13 @@
     "url": "https://github.com/simonrauch/harvey/issues"
   },
   "scripts": {
-    "prettier": "prettier 'src/**/*.ts'",
+    "prettier": "prettier --check 'src/**/*.ts'",
     "prettier:fix": "prettier --write 'src/**/*.ts'",
+    "eslint": "eslint . --ext .ts",
+    "eslint:fix": "eslint . --ext .ts --fix",
     "build": "rm -rf build; npx tsc",
-    "prepare": "npm run build",
+    "dev": "rm -rf build; npx tsc --watch",
+    "prepare": "husky install; npm run build",
     "pkg:macos-x64": "pkg . --targets node17-macos-x64 --output pkg/macos-x64/harvey",
     "pkg:linux-x64": "pkg . --targets node17-linux-x64 --output pkg/linux-x64/harvey"
   },
@@ -40,6 +43,11 @@
     "@types/filesystem": "^0.0.32",
     "@types/node": "^17.0.21",
     "@types/yargs": "^17.0.8",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "eslint": "^8.10.0",
+    "eslint-config-prettier": "^8.5.0",
+    "husky": "^7.0.4",
     "pkg": "^5.5.2",
     "prettier": "2.5.1",
     "typescript": "^4.6.2"

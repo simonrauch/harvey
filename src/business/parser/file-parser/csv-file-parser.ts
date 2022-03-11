@@ -1,8 +1,9 @@
 import { FileParser, ParserBookingEntry } from '..';
+import { HarveyError } from '../../error';
 
 export class CsvFileParser implements FileParser {
-  parserKey: string = 'csv';
+  parserKey = 'csv';
   async parseFile(filePath: string): Promise<ParserBookingEntry[]> {
-    throw new Error('Method not implemented.');
+    throw new HarveyError(`Cannot parse ${filePath} yet. CSV file parser is not yet implemented.`);
   }
 }

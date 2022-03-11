@@ -5,10 +5,11 @@ import { formatTimerHours } from '../helper';
 import { createInterface as createReadlineInterface } from 'readline';
 
 export async function printDay(date: string, config: Config): Promise<void> {
-  return new Promise(async (resolve) => {
-    const timeEntries = await getMyTimeEntriesPerDate(date, config);
-    printTimeEntryTable(timeEntries);
-    resolve();
+  return new Promise((resolve) => {
+    getMyTimeEntriesPerDate(date, config).then((timeEntries) => {
+      printTimeEntryTable(timeEntries);
+      resolve();
+    });
   });
 }
 function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {
@@ -31,14 +32,15 @@ function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {
 }
 
 export async function roundDay(date: string, roundingInterval: number, config: Config): Promise<void> {
-  return new Promise(async (resolve) => {
-    const timeEntries = await getMyTimeEntriesPerDate(date, config);
-    let updatePromises: Promise<HarvestTimeEntry>[] = [];
-    timeEntries.forEach((timeEntry) => {
-      timeEntry = roundTimeEntry(timeEntry, roundingInterval);
-      updatePromises.push(saveTimeEntry(timeEntry, config));
+  return new Promise((resolve) => {
+    getMyTimeEntriesPerDate(date, config).then((timeEntries) => {
+      const updatePromises: Promise<HarvestTimeEntry>[] = [];
+      timeEntries.forEach((timeEntry) => {
+        timeEntry = roundTimeEntry(timeEntry, roundingInterval);
+        updatePromises.push(saveTimeEntry(timeEntry, config));
+      });
+      Promise.all(updatePromises).then(() => resolve());
     });
-    Promise.all(updatePromises).then(() => resolve());
   });
 }
 function roundTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number): HarvestTimeEntry {
@@ -47,12 +49,13 @@ function roundTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number): 
   return timeEntry;
 }
 export async function modifyDay(date: string, roundingInterval: number, config: Config): Promise<void> {
-  return new Promise(async (resolve) => {
-    const timeEntries = await getMyTimeEntriesPerDate(date, config);
-    printTimeEntryTable(timeEntries);
-    const timeEntry = await chooseModifyTimeEntry(timeEntries);
-    await modifyTimeEntry(timeEntry, roundingInterval, config);
-    resolve();
+  return new Promise((resolve) => {
+    getMyTimeEntriesPerDate(date, config).then((timeEntries) => {
+      printTimeEntryTable(timeEntries);
+      chooseModifyTimeEntry(timeEntries).then((timeEntry) => {
+        modifyTimeEntry(timeEntry, roundingInterval, config).then(resolve);
+      });
+    });
   });
 }
 
@@ -94,10 +97,9 @@ async function roundAndSaveTimeEntry(
   roundingInterval: number,
   config: Config,
 ): Promise<void> {
-  return new Promise(async (resolve) => {
+  return new Promise((resolve) => {
     timeEntry = roundTimeEntry(timeEntry, roundingInterval);
-    await saveTimeEntry(timeEntry, config);
-    resolve();
+    saveTimeEntry(timeEntry, config).then(() => resolve());
   });
 }
 

@@ -1,5 +1,10 @@
 declare module 'node-harvest-api';
 
+interface Harvest {
+  time_entries: function;
+  users: function;
+}
+
 interface HarvestUser {
   id: number;
   first_name: string;

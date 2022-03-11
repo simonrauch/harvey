@@ -15,33 +15,33 @@ export interface Alias {
 class AliasNotFoundError extends HarveyError {}
 
 export async function addAlias(aliasKey: string, config: Config): Promise<Alias> {
-  return new Promise(async (resolve) => {
-    const projectTaskAssignments = await getMyProjectTaskAssignments(config);
-    const filteredProjectTaskAssignments = projectTaskAssignments.filter(
-      (projectTaskAssignment: HarvestProjectTaskAssignment) => {
-        return projectTaskAssignment.task.name.includes(aliasKey);
-      },
-    );
+  return new Promise((resolve) => {
+    getMyProjectTaskAssignments(config).then((projectTaskAssignments) => {
+      const filteredProjectTaskAssignments = projectTaskAssignments.filter(
+        (projectTaskAssignment: HarvestProjectTaskAssignment) => {
+          return projectTaskAssignment.task.name.includes(aliasKey);
+        },
+      );
 
-    if (filteredProjectTaskAssignments.length === 0) {
-      throw new Error(`Task "${aliasKey}" was not found.`);
-    }
+      if (filteredProjectTaskAssignments.length === 0) {
+        throw new Error(`Task "${aliasKey}" was not found.`);
+      }
 
-    if (filteredProjectTaskAssignments.length > 10) {
-      throw new Error(`Too many tasks for "${aliasKey}" were found. Please use a more specific alias.`);
-    }
+      if (filteredProjectTaskAssignments.length > 10) {
+        throw new Error(`Too many tasks for "${aliasKey}" were found. Please use a more specific alias.`);
+      }
 
-    const projectTaskAssignment = await findSingleProjectTaskAssignment(aliasKey, filteredProjectTaskAssignments);
-    const alias = mapProjectTaskAssignmentToAlias(aliasKey, projectTaskAssignment);
-
-    storeAlias(alias, config.aliasFilePath);
-
-    resolve(alias);
+      findSingleProjectTaskAssignment(aliasKey, filteredProjectTaskAssignments).then((projectTaskAssignment) => {
+        const alias = mapProjectTaskAssignmentToAlias(aliasKey, projectTaskAssignment);
+        storeAlias(alias, config.aliasFilePath);
+        resolve(alias);
+      });
+    });
   });
 }
 
 export async function getAliasOrCreate(aliasKey: string, config: Config): Promise<Alias> {
-  return new Promise(async (resolve) => {
+  return new Promise((resolve) => {
     try {
       const alias = getAlias(aliasKey, config.aliasFilePath);
       resolve(alias);
@@ -49,8 +49,7 @@ export async function getAliasOrCreate(aliasKey: string, config: Config): Promis
       if (!(error instanceof AliasNotFoundError)) {
         throw error;
       }
-      const alias = await addAlias(aliasKey, config);
-      resolve(alias);
+      addAlias(aliasKey, config).then(resolve);
     }
   });
 }
