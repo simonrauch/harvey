@@ -87,29 +87,57 @@ export function startTimer(alias: string, date: string, note: string, config: Co
   });
 }
 
-export function updateTimer(date: string, note: string, config: Config): Promise<void> {
+export function updateTimer(
+  date: string,
+  note: string,
+  addMinutes: number,
+  subtractMinutes: number,
+  config: Config,
+): Promise<void> {
   return new Promise((resolve) => {
-    const promises = [updateRunningTimer(date, note, config), updatePausedTimer(date, note, config)];
+    const hourDiff = getHourTimeDiff(addMinutes, subtractMinutes);
+    const promises = [
+      updateRunningTimer(date, note, hourDiff, config),
+      updatePausedTimer(date, note, hourDiff, config),
+    ];
     Promise.all(promises).then(() => resolve());
   });
 }
-async function updateRunningTimer(date: string, note: string, config: Config): Promise<void> {
+function getHourTimeDiff(addMinutes: number, subtractMinutes: number): number {
+  const minuteDiff = addMinutes - subtractMinutes;
+  return minuteDiff / 60;
+}
+function setHourTimeDiffOnTimeEntry(timeEntry: HarvestTimeEntry, hourDiff: number): HarvestTimeEntry {
+  const newHours = timeEntry.hours + hourDiff;
+  if (newHours < 0) {
+    throw new HarveyError('Cannot set time entries new to time to a value below 0.');
+  }
+  if (newHours > 24) {
+    throw new HarveyError('Cannot set time entries new to time to a value above 24h.');
+  }
+  timeEntry.hours = newHours;
+
+  return timeEntry;
+}
+async function updateRunningTimer(date: string, note: string, hourDiff: number, config: Config): Promise<void> {
   return new Promise((resolve) => {
     getRunningTimer(config).then((activeTimer) => {
       if (activeTimer) {
         activeTimer.spent_date = date;
         activeTimer.notes = note;
+        activeTimer = setHourTimeDiffOnTimeEntry(activeTimer, hourDiff);
         saveTimer(activeTimer, config).then(() => resolve());
       }
     });
   });
 }
-async function updatePausedTimer(date: string, note: string, config: Config): Promise<void> {
+async function updatePausedTimer(date: string, note: string, hourDiff: number, config: Config): Promise<void> {
   return new Promise((resolve) => {
-    const pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
+    let pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
     if (pausedTimer) {
       pausedTimer.spent_date = date;
       pausedTimer.notes = note;
+      pausedTimer = setHourTimeDiffOnTimeEntry(pausedTimer, hourDiff);
       saveTimer(pausedTimer, config).then((updatedTimer) => writeToJsonFile(updatedTimer, config.pausedTimerFilePath));
     } else {
       resolve();

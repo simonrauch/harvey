@@ -18,6 +18,8 @@ type Options = {
   note: string;
   date: string;
   action: string;
+  add: number;
+  subtract: number;
 };
 
 export const command = 'timer [<action>] [<alias>]';
@@ -29,6 +31,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
       note: { type: 'string', alias: 'n', default: '' },
       date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
+      add: { type: 'number', alias: 'a', default: 0 },
+      subtract: { type: 'number', alias: 's', default: 0 },
     })
     .positional('alias', { type: 'string', demandOption: false })
     .positional('action', {
@@ -38,7 +42,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const { config, alias, note, date, action } = argv;
+  const { config, alias, note, date, action, add, subtract } = argv;
 
   try {
     const configuration: Config = readConfigFile(config);
@@ -63,7 +67,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         await printTimerStatus(configuration);
         break;
       case 'update':
-        await updateTimer(convertDateInputToISODate(date), note, configuration);
+        await updateTimer(convertDateInputToISODate(date), note, add, subtract, configuration);
         await printTimerStatus(configuration);
         break;
       case 'status':
