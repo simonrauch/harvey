@@ -8,23 +8,20 @@ jobs:
     name: Create release
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.extract-version.outputs.tag }}
-      release-upload-url: ${{ steps.create-release.outputs.upload_url }}
+      version: ${{ steps.extract-version.outputs.version }}
+      version-without-v: ${{ steps.extract-version.outputs.version-without-v }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Extract version
         id: extract-version
-        run: |
-          printf "::set-output name=%s::%s\n" tag "${GITHUB_REF#refs/tags/}"
+        uses: battila7/get-version-action@v2
       - name: Release
         id: create-release
         uses: actions/create-release@v1
         with:
           draft: false
           prerelease: false
-          release_name: ${{ steps.extract-version.outputs.tag }}
-          tag_name: ${{ steps.extract-version.outputs.tag }}
+          release_name: ${{ steps.extract-version.outputs.version }}
+          tag_name: ${{ steps.extract-version.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
   npm-publish:
@@ -47,31 +44,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   homebrew-publish:
     name: Publish to Homebrew
-    needs: release
-    runs-on: macos-latest
+    needs: npm-publish
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '17.x'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Install 
-        run: npm ci
-      - name: Build MacOS binary 
-        run: npm run pkg:macos-x64
-      - name: Compress MacOS binary
-        run: cd ./pkg/macos-x64 && tar -cvzf ./harvey-macos-x64.tar.gz ./harvey && cd ../..
-      - name: Upload release asset 
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ needs.release.outputs.release-upload-url }}
-          asset_path: ./pkg/macos-x64/harvey-macos-x64.tar.gz
-          asset_name: harvey-macos-x64.tar.gz
-          asset_content_type: application/gzip
-        env: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Bump Homebrew formula
         uses: mislav/bump-homebrew-formula-action@v1
         with:
@@ -79,7 +54,7 @@ jobs:
           formula-path: Formula/harvey.rb
           homebrew-tap: simonrauch/homebrew-tap
           base-branch: main
-          download-url: https://github.com/simonrauch/harvey/releases/download/${{ needs.release.outputs.tag }}/harvey-macos-x64.tar.gz
+          download-url: https://registry.npmjs.org/@simonrauch/harvey/-/harvey-${{ needs.release.outputs.version-without-v }}.tgz
           commit-message: |
             {{formulaName}} {{version}}
         env:
