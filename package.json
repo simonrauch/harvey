@@ -1,11 +1,13 @@
 {
   "name": "@simonrauch/harvey",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "description": "A simple CLI for Harvest.",
   "bin": {
     "harvey": "./build/cli.js"
   },
-  "files": ["build/**/*"],
+  "files": [
+    "build/**/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/simonrauch/harvey.git"
