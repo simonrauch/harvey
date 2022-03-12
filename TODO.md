@@ -20,6 +20,10 @@
 - check auth after loading config
 - store authenticated user id after check
 
+## refactoring
+
+- refactor error handling
+
 ## codebase
 
 - add ci action
