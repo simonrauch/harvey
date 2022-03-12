@@ -1,5 +1,3 @@
-# .github/actions/cache-restore/action.yaml
-
 name: "Cache restoration"
 description: "Setup a NodeJS environment and restore cache if any, given a node version"
 
