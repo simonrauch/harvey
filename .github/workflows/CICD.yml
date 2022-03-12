@@ -1,0 +1,43 @@
+name: CICD
+on:
+  push:
+    branches: ['master']
+jobs:
+  setup:
+    name: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/cache-restore
+        id: cache-node-modules
+      - run: npm ci
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+  extract-commit-info:
+    name: Extract commit info
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      version-without-v: ${{ steps.extract-version.outputs.version-without-v }}
+    steps:
+      - name: Extract version
+        id: extract-version
+        uses: battila7/get-version-action@v2
+  style-check:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Restore Cache
+        uses: ./.github/actions/cache-restore
+      - run: npm run prettier
+      - run: npm run eslint
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/cache-restore
+        id: cache-node-modules
+      - run: npm run build
