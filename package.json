@@ -17,8 +17,8 @@
     "prettier:fix": "prettier --write 'src/**/*.ts'",
     "eslint": "eslint . --ext .ts",
     "eslint:fix": "eslint . --ext .ts --fix",
-    "build": "rm -rf build; npx tsc",
-    "dev": "rm -rf build; npx tsc --watch",
+    "build": "rm -rf build && npx tsc && chmod +x build/cli.js",
+    "dev": "npm run build && npx tsc --watch",
     "prepare": "husky install; npm run build"
   },
   "pkg": {

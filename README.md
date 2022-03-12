@@ -174,3 +174,12 @@ This would mean, that the parser will look for a worksheet called "Timebooking" 
 | TEST-201 | ...  | 30      |
 
 The entries for TEST-101, TEST-102 and TEST-103 will be created. The summed up 90 minutes won't be booked. The entry for TEST-201 also won't be booked because the parser will stop at the first empty line.
+
+# Setup for development
+
+- Make sure there is NO `harvey` command linked right now. Verify by running `harvey --version`. If there is harvey installed on your system right now, unlink the executable or simply uninstall.
+- Install using `npm i`
+- Link the the package `npm link .`
+- Start the tsc watcher `npm run dev`
+- Let the watcher run and open a second terminal. Running `harvey` in the second terminal will now run from the built executable in your project files and code changes should update it automatically. 
+- If you want to install the release version of Harvey again, unlink your local project by running `npm unlink .`, before doing so.
