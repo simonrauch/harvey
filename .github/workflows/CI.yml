@@ -1,4 +1,4 @@
-name: CICD
+name: CI
 on:
   push:
     branches: ['master']
@@ -15,16 +15,6 @@ jobs:
       - name: Install node_modules
         run: npm ci
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
-  extract-commit-info:
-    name: Extract commit info
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.extract-version.outputs.version }}
-      version-without-v: ${{ steps.extract-version.outputs.version-without-v }}
-    steps:
-      - name: Extract version
-        id: extract-version
-        uses: battila7/get-version-action@v2
   style-check:
     name: Check code style
     needs: setup
@@ -50,3 +40,13 @@ jobs:
         id: cache-node-modules
       - name: Run build
         run: npm run build
+  extract-commit-info:
+    name: Extract commit info
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      version-without-v: ${{ steps.extract-version.outputs.version-without-v }}
+    steps:
+      - name: Extract version
+        id: extract-version
+        uses: battila7/get-version-action@v2

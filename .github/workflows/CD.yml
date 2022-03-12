@@ -1,11 +1,11 @@
 name: CD
 on:
-  push:
-    tags: 
-      - 'v*'
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
 jobs:
-  release:
-    name: Create release
+  extract-commit-info:
+    name: Extract commit info
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
@@ -14,48 +14,58 @@ jobs:
       - name: Extract version
         id: extract-version
         uses: battila7/get-version-action@v2
-      - name: Release
-        id: create-release
-        uses: actions/create-release@v1
-        with:
-          draft: false
-          prerelease: false
-          release_name: ${{ steps.extract-version.outputs.version }}
-          tag_name: ${{ steps.extract-version.outputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-  npm-publish:
-    name: Publish to NPM
-    needs: release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '17.x'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Install 
-        run: npm ci
-      - name: Publish 
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  homebrew-publish:
-    name: Publish to Homebrew
-    needs: [release, npm-publish]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Bump Homebrew formula
-        uses: mislav/bump-homebrew-formula-action@v1
-        with:
-          formula-name: harvey
-          formula-path: Formula/harvey.rb
-          homebrew-tap: simonrauch/homebrew-tap
-          base-branch: main
-          download-url: https://registry.npmjs.org/@simonrauch/harvey/-/harvey-${{ needs.release.outputs.version-without-v }}.tgz
-          commit-message: |
-            {{formulaName}} {{version}}
-        env:
-          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+#  release:
+#    name: Create release
+#    runs-on: ubuntu-latest
+#    outputs:
+#      version: ${{ steps.extract-version.outputs.version }}
+#      version-without-v: ${{ steps.extract-version.outputs.version-without-v }}
+#    steps:
+#      - name: Extract version
+#        id: extract-version
+#        uses: battila7/get-version-action@v2
+#      - name: Release
+#        id: create-release
+#        uses: actions/create-release@v1
+#        with:
+#          draft: false
+#          prerelease: false
+#          release_name: ${{ steps.extract-version.outputs.version }}
+#          tag_name: ${{ steps.extract-version.outputs.version }}
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+#  npm-publish:
+#    name: Publish to NPM
+#    needs: release
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#      - name: Setup node
+#        uses: actions/setup-node@v2
+#        with:
+#          node-version: '17.x'
+#          registry-url: 'https://registry.npmjs.org'
+#      - name: Install 
+#        run: npm ci
+#      - name: Publish 
+#        run: npm publish
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#  homebrew-publish:
+#    name: Publish to Homebrew
+#    needs: [release, npm-publish]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Bump Homebrew formula
+#        uses: mislav/bump-homebrew-formula-action@v1
+#        with:
+#          formula-name: harvey
+#          formula-path: Formula/harvey.rb
+#          homebrew-tap: simonrauch/homebrew-tap
+#          base-branch: main
+#          download-url: https://registry.npmjs.org/@simonrauch/harvey/-/harvey-${{ needs.release.outputs.version-without-v }}.tgz
+#          commit-message: |
+#            {{formulaName}} {{version}}
+#        env:
+#          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
