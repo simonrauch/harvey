@@ -49,8 +49,8 @@ jobs:
           name: build
           path: build
   test:
-    name: test
-    needs: [setup, build]
+    name: Test
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -58,6 +58,8 @@ jobs:
       - name: Restore Cache
         uses: ./.github/actions/cache-restore
         id: cache-node-modules
+      - name: Run tests
+        run: npm test
   release:
     name: Create release
     needs: [build, test, lint]

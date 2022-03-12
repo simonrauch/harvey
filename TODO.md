@@ -26,8 +26,6 @@
 
 ## codebase
 
-- add ci action
-- add linting to ci action
 - tests
 
 ## add oauth authentication
