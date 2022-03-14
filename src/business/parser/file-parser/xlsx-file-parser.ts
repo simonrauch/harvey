@@ -1,12 +1,13 @@
 import { Cell, Workbook, Worksheet } from 'exceljs';
 import type { FileParser, ParserBookingEntry } from '..';
-import { Config } from '../../config';
+import { HarveyConfig } from '../../config';
 import { HarveyError } from '../../error';
 
 export class XlsxFileParser implements FileParser {
   parserKey = 'xlsx';
-  async parseFile(filePath: string, config: Config): Promise<ParserBookingEntry[]> {
+  async parseFile(filePath: string): Promise<ParserBookingEntry[]> {
     return new Promise((resolve) => {
+      const config = HarveyConfig.getConfig();
       this.readFile(filePath).then((workbook) => {
         const worksheet = this.findWorksheetByName((config.fileParser.worksheet ??= 'Timebooking'), workbook);
         const aliasHeadingCell = this.findCellByValue((config.fileParser.aliasColumn ??= 'Link'), worksheet);

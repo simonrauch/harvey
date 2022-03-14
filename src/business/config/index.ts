@@ -1,8 +1,6 @@
-import fs from 'fs';
-import Harvest from 'node-harvest-api';
-import { createInterface as createReadlineInterface } from 'readline';
-import path from 'path';
-import { transformPath } from '../helper';
+import { askForHarvestAccountId, askForPersonalAccessToken } from '../../presentation/user-input/config';
+import { isAccountIdAndTokenValid } from '../../service/api/harvest';
+import { readConfigFile, writeConfigFile } from '../../service/filesystem/config';
 
 export interface Config {
   accountId: string;
@@ -12,6 +10,26 @@ export interface Config {
   defaultRoundingInterval: number;
   fileParser: FileParserConfig;
   harvestSubdomain?: string;
+}
+
+export class HarveyConfig {
+  private static config: Config;
+  private constructor() {
+    throw new Error("Don't use the constructor of this class. Only use it's static methods.");
+  }
+  public static getConfig(): Config {
+    if (!this.config) {
+      throw new Error('Global config was never initialised.');
+    }
+    return this.config;
+  }
+  public static loadConfig(configFilePath: string): Config {
+    this.config = readConfigFile(configFilePath);
+    return this.config;
+  }
+  public static setConfig(config: Config): void {
+    this.config = config;
+  }
 }
 
 export interface FileParserConfig {
@@ -35,69 +53,23 @@ const defaultConfig: Config = {
   },
 };
 
-export function configFileExists(filePath: string): boolean {
-  filePath = transformPath(filePath);
-  return fs.existsSync(filePath);
-}
-
-export async function testNewConfigsHarvestCreds(config: Config): Promise<boolean> {
-  const harvest = new Harvest(config.accountId, config.accessToken, 'harvey');
-
-  return new Promise((resolve) => {
-    harvest.users.me().then((user: HarvestUser) => {
-      if (user.first_name) {
-        resolve(true);
-      }
-      resolve(false);
-    });
-  });
-}
-
 export async function initializeConfig(filePath: string): Promise<void> {
-  const newConfig: Config = await askForConfigParameters();
-  const configIsValid = await testNewConfigsHarvestCreds(newConfig);
-
-  if (!configIsValid) {
-    process.stdout.write('Could not authenticate, please try again.\n');
-
-    await initializeConfig(filePath);
-  }
-
-  writeConfigFile(newConfig, filePath);
-}
-
-export function readConfigFile(filePath: string): Config {
-  if (!configFileExists(filePath)) {
-    throw new Error(`No config file found at ${filePath}. Please create one, by running the init command`);
-  }
-  filePath = transformPath(filePath);
-  return JSON.parse(fs.readFileSync(filePath).toString());
-}
-
-function writeConfigFile(config: Config, filePath: string): void {
-  filePath = transformPath(filePath);
-  if (!fs.existsSync(path.dirname(filePath))) {
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  }
-  fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf8');
-  process.stdout.write(`Sucessfully generated config ${filePath}\n`);
-}
-
-async function askForConfigParameters(): Promise<Config> {
   return new Promise((resolve) => {
-    const config: Config = defaultConfig;
-
-    const rl = createReadlineInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    rl.question('Please enter your harvest account id: ', function (account_id: string) {
-      config.accountId = account_id;
-      rl.question('Please enter your personal access token: ', function (token: string) {
-        config.accessToken = token;
-        rl.close();
-        resolve(config);
+    const newConfig = defaultConfig;
+    askForHarvestAccountId().then((accountId) => {
+      newConfig.accountId = accountId;
+      askForPersonalAccessToken().then((token) => {
+        newConfig.accessToken = token;
+        isAccountIdAndTokenValid(newConfig.accountId, newConfig.accessToken).then((credentialsAreValid) => {
+          if (credentialsAreValid) {
+            writeConfigFile(newConfig, filePath);
+            process.stdout.write(`Sucessfully generated config ${filePath}\n`);
+            resolve();
+          } else {
+            process.stdout.write('Could not authenticate, please try again.\n');
+            initializeConfig(filePath).then(resolve);
+          }
+        });
       });
     });
   });

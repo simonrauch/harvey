@@ -1,14 +1,15 @@
 import { Alias, getAliasOrCreate } from '../alias';
-import { Config } from '../config';
+import { HarveyConfig } from '../config';
 import { HarveyError } from '../error';
-import { bookTimeEntry } from '../../api/harvest';
+import { bookTimeEntry } from '../../service/api/harvest';
 import { convertMinuteTimeInputToHours } from '../helper';
 import { CsvFileParser } from './file-parser/csv-file-parser';
 import { XlsxFileParser } from './file-parser/xlsx-file-parser';
+import { HarvestTimeEntry } from 'node-harvest-api';
 
 export interface FileParser {
   parserKey: string;
-  parseFile(filePath: string, config: Config): Promise<ParserBookingEntry[]>;
+  parseFile(filePath: string): Promise<ParserBookingEntry[]>;
 }
 
 export interface ParserBookingEntry {
@@ -31,27 +32,23 @@ function getFileParserByKey(fileParserKey: string): FileParser {
   return foundFileParser;
 }
 
-export async function parseFileAndBookEntries(
-  filePath: string,
-  date: string,
-  note: string,
-  config: Config,
-): Promise<void> {
+export async function parseFileAndBookEntries(filePath: string, date: string, note: string): Promise<void> {
   return new Promise((resolve) => {
+    const config = HarveyConfig.getConfig();
     const fileParser = getFileParserByKey(config.fileParser.type);
-    fileParser.parseFile(filePath, config).then((entries) => {
-      bookEntries(entries, date, note, config).then(() => resolve());
+    fileParser.parseFile(filePath).then((entries) => {
+      bookEntries(entries, date, note).then(() => resolve());
     });
   });
 }
 
-async function bookEntries(entries: ParserBookingEntry[], date: string, note: string, config: Config): Promise<void> {
+async function bookEntries(entries: ParserBookingEntry[], date: string, note: string): Promise<void> {
   return new Promise((resolve) => {
-    findAliases(entries, config).then((aliases) => {
+    findAliases(entries).then((aliases) => {
       const timeEntries = mapAliasesAndEntriesToHarvestTimeEntry(aliases, entries, date, note);
       const timeEntryCreationPromises = [];
       for (const timeEntry of timeEntries) {
-        timeEntryCreationPromises.push(bookTimeEntry(timeEntry, config));
+        timeEntryCreationPromises.push(bookTimeEntry(timeEntry));
       }
       Promise.all(timeEntryCreationPromises).then(() => {
         resolve();
@@ -60,10 +57,10 @@ async function bookEntries(entries: ParserBookingEntry[], date: string, note: st
   });
 }
 
-async function findAliases(entries: ParserBookingEntry[], config: Config): Promise<Alias[]> {
+async function findAliases(entries: ParserBookingEntry[]): Promise<Alias[]> {
   const aliases: Alias[] = [];
   for (const entry of entries) {
-    aliases.push(await getAliasOrCreate(entry.alias, config));
+    aliases.push(await getAliasOrCreate(entry.alias));
   }
   return new Promise((resolve) => {
     resolve(aliases);

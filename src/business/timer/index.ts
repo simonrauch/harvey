@@ -1,38 +1,44 @@
 import { getAliasOrCreate } from '../alias';
-import { Config } from '../config';
+import { HarveyConfig } from '../config';
 import { HarveyError } from '../error';
-import { getRunningTimer, restartTimer, saveTimer, stopTimer } from '../../api/harvest';
-import { deleteFile, formatTimerHours, readFromJsonFile, writeToJsonFile } from '../helper';
-import Table from 'cli-table';
+import { getRunningTimeEntry, restartTimeEntry, saveTimeEntry, stopTimeEntry } from '../../service/api/harvest';
+import { deleteFile, readFromJsonFile, writeToJsonFile } from '../../service/filesystem';
+import { HarvestTimeEntry } from 'node-harvest-api';
+import { printTimer } from '../../presentation/cli-output/timer';
 
-export async function printTimerStatus(config: Config): Promise<void> {
+export enum HarveyTimerStatus {
+  stopped,
+  running,
+  paused,
+}
+export interface HarveyTimer {
+  timeEntry?: HarvestTimeEntry;
+  status: HarveyTimerStatus;
+}
+export async function showTimer(): Promise<void> {
   return new Promise((resolve) => {
-    const pausedTimer = getPausedTimer(config);
-    getRunningTimer(config).then((activeTimer) => {
+    const pausedTimer = getPausedTimer();
+    getRunningTimeEntry().then((activeTimer) => {
       if (!pausedTimer && !activeTimer) {
-        process.stdout.write(formatTimeEntry('STOPPED'));
+        printTimer({ status: HarveyTimerStatus.stopped });
+      } else if (activeTimer) {
+        printTimer({ status: HarveyTimerStatus.running, timeEntry: activeTimer });
+      } else if (pausedTimer) {
+        printTimer({ status: HarveyTimerStatus.paused, timeEntry: pausedTimer });
       }
-
-      if (activeTimer) {
-        process.stdout.write(formatTimeEntry('RUNNING', activeTimer));
-      }
-
-      if (pausedTimer) {
-        process.stdout.write(formatTimeEntry('PAUSED', pausedTimer));
-      }
-
       resolve();
     });
   });
 }
 
-export async function pauseActiveTimer(config: Config): Promise<void> {
+export async function pauseActiveTimer(): Promise<void> {
   return new Promise((resolve) => {
-    getRunningTimer(config).then((activeTimer) => {
+    getRunningTimeEntry().then((activeTimer) => {
       if (!activeTimer) {
         throw new HarveyError('No active timer to pause.');
       }
-      stopTimer(activeTimer, config).then((stoppedTimer) => {
+      stopTimeEntry(activeTimer).then((stoppedTimer) => {
+        const config = HarveyConfig.getConfig();
         writeToJsonFile(stoppedTimer, config.pausedTimerFilePath);
         resolve();
       });
@@ -40,9 +46,10 @@ export async function pauseActiveTimer(config: Config): Promise<void> {
   });
 }
 
-export function resumePausedTimer(config: Config): Promise<void> {
+export function resumePausedTimer(): Promise<void> {
   return new Promise((resolve) => {
-    getRunningTimer(config).then((activeTimer) => {
+    const config = HarveyConfig.getConfig();
+    getRunningTimeEntry().then((activeTimer) => {
       const pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
       if (!activeTimer && !pausedTimer) {
         throw new HarveyError('No paused timer to resume available.');
@@ -52,7 +59,7 @@ export function resumePausedTimer(config: Config): Promise<void> {
         resolve();
       }
       if (pausedTimer) {
-        restartTimer(pausedTimer, config).then(() => {
+        restartTimeEntry(pausedTimer).then(() => {
           deleteFile(config.pausedTimerFilePath);
           resolve();
         });
@@ -61,25 +68,23 @@ export function resumePausedTimer(config: Config): Promise<void> {
   });
 }
 
-export function startTimer(alias: string, date: string, note: string, config: Config): Promise<void> {
+export function startTimer(alias: string, date: string, note: string): Promise<void> {
   return new Promise((resolve) => {
+    const config = HarveyConfig.getConfig();
     deleteFile(config.pausedTimerFilePath);
-    getRunningTimer(config).then((activeTimer) => {
+    getRunningTimeEntry().then((activeTimer) => {
       if (activeTimer) {
         throw new HarveyError('Timer already running. Please stop it, before starting a new one.');
       }
-      getAliasOrCreate(alias, config).then((aliasEntry) => {
-        saveTimer(
-          {
-            project_id: aliasEntry.idProject,
-            task_id: aliasEntry.idTask,
-            hours: 0,
-            notes: note,
-            spent_date: date,
-            is_running: true,
-          },
-          config,
-        ).then(() => {
+      getAliasOrCreate(alias).then((aliasEntry) => {
+        saveTimeEntry({
+          project_id: aliasEntry.idProject,
+          task_id: aliasEntry.idTask,
+          hours: 0,
+          notes: note,
+          spent_date: date,
+          is_running: true,
+        }).then(() => {
           resolve();
         });
       });
@@ -87,19 +92,10 @@ export function startTimer(alias: string, date: string, note: string, config: Co
   });
 }
 
-export function updateTimer(
-  date: string,
-  note: string,
-  addMinutes: number,
-  subtractMinutes: number,
-  config: Config,
-): Promise<void> {
+export function updateTimer(date: string, note: string, addMinutes: number, subtractMinutes: number): Promise<void> {
   return new Promise((resolve) => {
     const hourDiff = getHourTimeDiff(addMinutes, subtractMinutes);
-    const promises = [
-      updateRunningTimer(date, note, hourDiff, config),
-      updatePausedTimer(date, note, hourDiff, config),
-    ];
+    const promises = [updateRunningTimer(date, note, hourDiff), updatePausedTimer(date, note, hourDiff)];
     Promise.all(promises).then(() => resolve());
   });
 }
@@ -119,37 +115,39 @@ function setHourTimeDiffOnTimeEntry(timeEntry: HarvestTimeEntry, hourDiff: numbe
 
   return timeEntry;
 }
-async function updateRunningTimer(date: string, note: string, hourDiff: number, config: Config): Promise<void> {
+async function updateRunningTimer(date: string, note: string, hourDiff: number): Promise<void> {
   return new Promise((resolve) => {
-    getRunningTimer(config).then((activeTimer) => {
+    getRunningTimeEntry().then((activeTimer) => {
       if (activeTimer) {
         activeTimer.spent_date = date;
         activeTimer.notes = note;
         activeTimer = setHourTimeDiffOnTimeEntry(activeTimer, hourDiff);
-        saveTimer(activeTimer, config).then(() => resolve());
+        saveTimeEntry(activeTimer).then(() => resolve());
       }
     });
   });
 }
-async function updatePausedTimer(date: string, note: string, hourDiff: number, config: Config): Promise<void> {
+async function updatePausedTimer(date: string, note: string, hourDiff: number): Promise<void> {
   return new Promise((resolve) => {
+    const config = HarveyConfig.getConfig();
     let pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
     if (pausedTimer) {
       pausedTimer.spent_date = date;
       pausedTimer.notes = note;
       pausedTimer = setHourTimeDiffOnTimeEntry(pausedTimer, hourDiff);
-      saveTimer(pausedTimer, config).then((updatedTimer) => writeToJsonFile(updatedTimer, config.pausedTimerFilePath));
+      saveTimeEntry(pausedTimer).then((updatedTimer) => writeToJsonFile(updatedTimer, config.pausedTimerFilePath));
     } else {
       resolve();
     }
   });
 }
-export function stopRunningTimer(config: Config): Promise<void> {
+export function stopRunningTimer(): Promise<void> {
   return new Promise((resolve) => {
-    getRunningTimer(config).then((activeTimer) => {
+    const config = HarveyConfig.getConfig();
+    getRunningTimeEntry().then((activeTimer) => {
       deleteFile(config.pausedTimerFilePath);
       if (activeTimer) {
-        stopTimer(activeTimer, config).then(() => resolve());
+        stopTimeEntry(activeTimer).then(() => resolve());
       } else {
         resolve();
       }
@@ -157,24 +155,7 @@ export function stopRunningTimer(config: Config): Promise<void> {
   });
 }
 
-function formatTimeEntry(status: string, timeEntry?: HarvestTimeEntry): string {
-  let tableHead: string[] = ['Status'];
-  let colWidth: number[] = [9];
-  let tableRow: string[] = [status];
-  if (timeEntry && timeEntry.task) {
-    tableHead = tableHead.concat(['Task', 'Notes', 'Timer']);
-    colWidth = colWidth.concat([44, 20, 7]);
-    tableRow = tableRow.concat([timeEntry.task.name, (timeEntry.notes ??= ''), formatTimerHours(timeEntry.hours)]);
-  }
-
-  const table = new Table({
-    head: tableHead,
-    colWidths: colWidth,
-  });
-  table.push(tableRow);
-  return table.toString() + '\n';
-}
-
-function getPausedTimer(config: Config): HarvestTimeEntry | null {
+function getPausedTimer(): HarvestTimeEntry | null {
+  const config = HarveyConfig.getConfig();
   return readFromJsonFile(config.pausedTimerFilePath);
 }

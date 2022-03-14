@@ -1,10 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import { createInterface as createReadlineInterface } from 'readline';
-import type { Config } from '../config';
-import { getMyProjectTaskAssignments } from '../../api/harvest';
+import { getMyProjectTaskAssignments } from '../../service/api/harvest';
 import { HarveyError } from '../error';
-import { transformPath } from '../helper';
+import { HarvestProjectTaskAssignment } from 'node-harvest-api';
+import { readAliasFile, writeAliasFile } from '../../service/filesystem/alias';
+import { askToChooseTaskProjectAssignmentForAliasing } from '../../presentation/user-input/alias';
 
 export interface Alias {
   alias: string;
@@ -14,9 +12,9 @@ export interface Alias {
 
 class AliasNotFoundError extends HarveyError {}
 
-export async function addAlias(aliasKey: string, config: Config): Promise<Alias> {
+export async function addAlias(aliasKey: string): Promise<Alias> {
   return new Promise((resolve) => {
-    getMyProjectTaskAssignments(config).then((projectTaskAssignments) => {
+    getMyProjectTaskAssignments().then((projectTaskAssignments) => {
       const filteredProjectTaskAssignments = projectTaskAssignments.filter(
         (projectTaskAssignment: HarvestProjectTaskAssignment) => {
           return projectTaskAssignment.task.name.includes(aliasKey);
@@ -33,29 +31,29 @@ export async function addAlias(aliasKey: string, config: Config): Promise<Alias>
 
       findSingleProjectTaskAssignment(aliasKey, filteredProjectTaskAssignments).then((projectTaskAssignment) => {
         const alias = mapProjectTaskAssignmentToAlias(aliasKey, projectTaskAssignment);
-        storeAlias(alias, config.aliasFilePath);
+        storeAlias(alias);
         resolve(alias);
       });
     });
   });
 }
 
-export async function getAliasOrCreate(aliasKey: string, config: Config): Promise<Alias> {
+export async function getAliasOrCreate(aliasKey: string): Promise<Alias> {
   return new Promise((resolve) => {
     try {
-      const alias = getAlias(aliasKey, config.aliasFilePath);
+      const alias = getAlias(aliasKey);
       resolve(alias);
     } catch (error) {
       if (!(error instanceof AliasNotFoundError)) {
         throw error;
       }
-      addAlias(aliasKey, config).then(resolve);
+      addAlias(aliasKey).then(resolve);
     }
   });
 }
 
-export function getAlias(aliasKey: string, aliasFilePath: string): Alias {
-  const alias = readAliasFile(aliasFilePath).get(aliasKey);
+export function getAlias(aliasKey: string): Alias {
+  const alias = readAliasFile().get(aliasKey);
 
   if (!alias) {
     throw new AliasNotFoundError();
@@ -64,8 +62,8 @@ export function getAlias(aliasKey: string, aliasFilePath: string): Alias {
   return alias;
 }
 
-export function removeAlias(aliasKey: string, config: Config): void {
-  const aliases = readAliasFile(config.aliasFilePath);
+export function removeAlias(aliasKey: string): void {
+  const aliases = readAliasFile();
 
   if (!aliases.has(aliasKey)) {
     throw new Error(`"${aliasKey}" was not found. Nothing to remove.`);
@@ -73,11 +71,11 @@ export function removeAlias(aliasKey: string, config: Config): void {
 
   aliases.delete(aliasKey);
 
-  writeAliasFile(aliases, config.aliasFilePath);
+  writeAliasFile(aliases);
 }
 
-export function removeAllAliases(config: Config): void {
-  writeAliasFile(new Map(), config.aliasFilePath);
+export function removeAllAliases(): void {
+  writeAliasFile(new Map());
 }
 
 async function findSingleProjectTaskAssignment(
@@ -89,32 +87,11 @@ async function findSingleProjectTaskAssignment(
       resolve(projectTaskAssignments[0]);
       return;
     }
-
     process.stdout.write(`Multiple tasks for "${aliasKey}" were found: \n`);
-
-    const rl = createReadlineInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
     projectTaskAssignments.forEach((projectTaskAssignment, index) => {
       process.stdout.write(`${index} - ${projectTaskAssignment.task.name} (${projectTaskAssignment.project.name}) \n`);
     });
-
-    rl.question('Please choose one of the follwing, by entering the number: ', function (numberEntered: string) {
-      const index = Number(numberEntered);
-
-      if (isNaN(index)) {
-        throw new Error(`${index} is not a number.`);
-      }
-
-      if (!projectTaskAssignments[index]) {
-        throw new Error(`${index} is not a valid option.`);
-      }
-
-      rl.close();
-      resolve(projectTaskAssignments[index]);
-    });
+    askToChooseTaskProjectAssignmentForAliasing(projectTaskAssignments).then(resolve);
   });
 }
 
@@ -126,29 +103,8 @@ function mapProjectTaskAssignmentToAlias(aliasKey: string, projectTaskAssignment
   };
 }
 
-function storeAlias(alias: Alias, aliasFilePath: string): void {
-  const aliases = readAliasFile(aliasFilePath);
+function storeAlias(alias: Alias): void {
+  const aliases = readAliasFile();
   aliases.set(alias.alias, alias);
-  writeAliasFile(aliases, aliasFilePath);
-}
-
-function readAliasFile(filePath: string): Map<string, Alias> {
-  if (!aliasFileExists(filePath)) {
-    writeAliasFile(new Map(), filePath);
-  }
-  filePath = transformPath(filePath);
-  return new Map(JSON.parse(fs.readFileSync(filePath).toString()));
-}
-
-function writeAliasFile(aliases: Map<string, Alias>, filePath: string): void {
-  filePath = transformPath(filePath);
-  if (!fs.existsSync(path.dirname(filePath))) {
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  }
-  fs.writeFileSync(filePath, JSON.stringify(Array.from(aliases.entries())), 'utf8');
-}
-
-function aliasFileExists(filePath: string): boolean {
-  filePath = transformPath(filePath);
-  return fs.existsSync(filePath);
+  writeAliasFile(aliases);
 }

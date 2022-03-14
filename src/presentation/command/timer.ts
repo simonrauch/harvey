@@ -1,16 +1,15 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import type { Config } from '../business/config';
-import { readConfigFile } from '../business/config';
-import { handleError, HarveyError } from '../business/error';
-import { convertDateInputToISODate } from '../business/helper';
+import { HarveyConfig } from '../../business/config';
+import { handleError, HarveyError } from '../../business/error';
+import { convertDateInputToISODate } from '../../business/helper';
 import {
   pauseActiveTimer,
-  printTimerStatus,
+  showTimer,
   resumePausedTimer,
   startTimer,
   stopRunningTimer,
   updateTimer,
-} from '../business/timer';
+} from '../../business/timer';
 
 type Options = {
   config: string;
@@ -45,33 +44,33 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
   const { config, alias, note, date, action, add, subtract } = argv;
 
   try {
-    const configuration: Config = readConfigFile(config);
+    HarveyConfig.loadConfig(config);
     switch (action) {
       case 'start':
         if (!alias) {
           throw new HarveyError('<alias> is required to start a timer.');
         }
-        await startTimer(alias, convertDateInputToISODate(date), note, configuration);
-        await printTimerStatus(configuration);
+        await startTimer(alias, convertDateInputToISODate(date), note);
+        await showTimer();
         break;
       case 'stop':
-        await stopRunningTimer(configuration);
-        await printTimerStatus(configuration);
+        await stopRunningTimer();
+        await showTimer();
         break;
       case 'pause':
-        await pauseActiveTimer(configuration);
-        await printTimerStatus(configuration);
+        await pauseActiveTimer();
+        await showTimer();
         break;
       case 'resume':
-        await resumePausedTimer(configuration);
-        await printTimerStatus(configuration);
+        await resumePausedTimer();
+        await showTimer();
         break;
       case 'update':
-        await updateTimer(convertDateInputToISODate(date), note, add, subtract, configuration);
-        await printTimerStatus(configuration);
+        await updateTimer(convertDateInputToISODate(date), note, add, subtract);
+        await showTimer();
         break;
       case 'status':
-        await printTimerStatus(configuration);
+        await showTimer();
         break;
     }
   } catch (error) {

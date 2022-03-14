@@ -1,9 +1,8 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import type { Config } from '../business/config';
-import { readConfigFile } from '../business/config';
-import { modifyDay, printDay, roundDay } from '../business/day';
-import { handleError } from '../business/error';
-import { convertDateInputToISODate } from '../business/helper';
+import { HarveyConfig } from '../../business/config';
+import { modifyDay, printDay, roundDay } from '../../business/day';
+import { handleError } from '../../business/error';
+import { convertDateInputToISODate } from '../../business/helper';
 
 type Options = {
   config: string;
@@ -32,26 +31,19 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
   const { config, date, action, rounding_interval } = argv;
 
   try {
-    const configuration: Config = readConfigFile(config);
+    HarveyConfig.loadConfig(config);
+    const configuration = HarveyConfig.getConfig();
     switch (action) {
       case 'status':
-        await printDay(convertDateInputToISODate(date), configuration);
+        await printDay(convertDateInputToISODate(date));
         break;
       case 'round':
-        await roundDay(
-          convertDateInputToISODate(date),
-          rounding_interval ?? configuration.defaultRoundingInterval,
-          configuration,
-        );
-        await printDay(convertDateInputToISODate(date), configuration);
+        await roundDay(convertDateInputToISODate(date), rounding_interval ?? configuration.defaultRoundingInterval);
+        await printDay(convertDateInputToISODate(date));
         break;
       case 'modify':
-        await modifyDay(
-          convertDateInputToISODate(date),
-          rounding_interval ?? configuration.defaultRoundingInterval,
-          configuration,
-        );
-        await printDay(convertDateInputToISODate(date), configuration);
+        await modifyDay(convertDateInputToISODate(date), rounding_interval ?? configuration.defaultRoundingInterval);
+        await printDay(convertDateInputToISODate(date));
         break;
     }
   } catch (error) {

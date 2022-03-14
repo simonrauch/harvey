@@ -1,8 +1,7 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import { addAlias, removeAlias, removeAllAliases } from '../business/alias';
-import type { Config } from '../business/config';
-import { readConfigFile } from '../business/config';
-import { handleError, HarveyError } from '../business/error';
+import { addAlias, removeAlias, removeAllAliases } from '../../business/alias';
+import { HarveyConfig } from '../../business/config';
+import { handleError, HarveyError } from '../../business/error';
 
 type Options = {
   config: string;
@@ -29,22 +28,22 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
   const { config, alias, action } = argv;
 
   try {
-    const configuration: Config = readConfigFile(config);
+    HarveyConfig.loadConfig(config);
     switch (action) {
       case 'add':
         if (!alias) {
           throw new HarveyError('<alias> is required to add an alias.');
         }
-        await addAlias(alias, configuration);
+        await addAlias(alias);
         break;
       case 'remove':
         if (!alias) {
           throw new HarveyError('<alias> is required to remove an alias.');
         }
-        await removeAlias(alias, configuration);
+        await removeAlias(alias);
         break;
       case 'remove-all':
-        await removeAllAliases(configuration);
+        await removeAllAliases();
         break;
     }
   } catch (error) {

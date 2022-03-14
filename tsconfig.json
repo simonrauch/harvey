@@ -8,6 +8,10 @@
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
     "outDir": "./build",
     "importHelpers": false,
+    "typeRoots": [
+      "./src/@types",
+      "./node_modules/@types"
+    ]
   },
   "include": ["src"],
   "exclude": [

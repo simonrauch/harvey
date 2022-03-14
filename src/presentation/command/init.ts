@@ -1,6 +1,6 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import { initializeConfig } from '../business/config';
-import { handleError } from '../business/error';
+import { initializeConfig } from '../../business/config';
+import { handleError } from '../../business/error';
 
 export const command = 'init';
 export const desc = 'Generate and test a config file.';

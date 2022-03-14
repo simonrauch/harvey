@@ -22,7 +22,7 @@
     "eslint:fix": "eslint . --ext .ts --fix",
     "build": "rm -rf build && npx tsc && chmod +x build/cli.js",
     "dev": "npm run build && npx tsc --watch",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
+    "test": "env mocha -r ts-node/register 'tests/**/*.ts'",
     "prepare": "husky install; npm run build",
     "postversion": "git push && git push --tags"
   },
@@ -52,6 +52,7 @@
     "eslint-config-prettier": "^8.5.0",
     "husky": "^7.0.4",
     "mocha": "^9.2.2",
+    "nock": "^13.2.4",
     "prettier": "2.5.1",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.2"

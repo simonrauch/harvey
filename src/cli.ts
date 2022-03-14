@@ -3,6 +3,6 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-yargs(hideBin(process.argv)).commandDir('commands').strict().alias({
+yargs(hideBin(process.argv)).commandDir('presentation/command').strict().alias({
   h: 'help',
 }).argv;

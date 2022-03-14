@@ -1,9 +1,8 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-import type { Config } from '../business/config';
-import { readConfigFile } from '../business/config';
-import { handleError } from '../business/error';
-import { convertDateInputToISODate } from '../business/helper';
-import { parseFileAndBookEntries } from '../business/parser';
+import { HarveyConfig } from '../../business/config';
+import { handleError } from '../../business/error';
+import { convertDateInputToISODate } from '../../business/helper';
+import { parseFileAndBookEntries } from '../../business/parser';
 
 type Options = {
   config: string;
@@ -28,8 +27,8 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
   const { config, file, note, date } = argv;
 
   try {
-    const configuration: Config = readConfigFile(config);
-    await parseFileAndBookEntries(file, convertDateInputToISODate(date), note, configuration);
+    HarveyConfig.loadConfig(config);
+    await parseFileAndBookEntries(file, convertDateInputToISODate(date), note);
   } catch (error) {
     handleError(error);
     process.exit(1);

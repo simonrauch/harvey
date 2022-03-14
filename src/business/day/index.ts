@@ -1,43 +1,29 @@
-import { Config } from '../config';
-import { deleteTimeEntry, getMyTimeEntriesPerDate, saveTimer as saveTimeEntry } from '../../api/harvest';
-import Table from 'cli-table';
-import { formatTimerHours } from '../helper';
-import { createInterface as createReadlineInterface } from 'readline';
+import { deleteTimeEntry, getMyTimeEntriesPerDate, saveTimeEntry as saveTimeEntry } from '../../service/api/harvest';
+import { HarvestTimeEntry } from 'node-harvest-api';
+import {
+  askForNewHours,
+  askForNewNote,
+  askForTimeEntryModifyAction,
+  askToChooseTimeEntryToModify,
+} from '../../presentation/user-input/day';
+import { printTimeEntryTable } from '../../presentation/cli-output/day';
 
-export async function printDay(date: string, config: Config): Promise<void> {
+export async function printDay(date: string): Promise<void> {
   return new Promise((resolve) => {
-    getMyTimeEntriesPerDate(date, config).then((timeEntries) => {
+    getMyTimeEntriesPerDate(date).then((timeEntries) => {
       printTimeEntryTable(timeEntries);
       resolve();
     });
   });
 }
-function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {
-  let totalTime = 0;
-  const table = new Table({
-    head: ['ID', 'Task', 'Notes', 'Time'],
-    colWidths: [4, 49, 20, 7],
-  });
 
-  timeEntries.forEach((timeEntry, index) => {
-    totalTime += timeEntry.hours;
-    table.push([index, timeEntry.task?.name ?? '', timeEntry.notes ?? '', formatTimerHours(timeEntry.hours)]);
-  });
-  process.stdout.write(table.toString() + '\n');
-  process.stdout.write(
-    ' Sum:                                                                         ' +
-      formatTimerHours(totalTime) +
-      '\n\n',
-  );
-}
-
-export async function roundDay(date: string, roundingInterval: number, config: Config): Promise<void> {
+export async function roundDay(date: string, roundingInterval: number): Promise<void> {
   return new Promise((resolve) => {
-    getMyTimeEntriesPerDate(date, config).then((timeEntries) => {
+    getMyTimeEntriesPerDate(date).then((timeEntries) => {
       const updatePromises: Promise<HarvestTimeEntry>[] = [];
       timeEntries.forEach((timeEntry) => {
         timeEntry = roundTimeEntry(timeEntry, roundingInterval);
-        updatePromises.push(saveTimeEntry(timeEntry, config));
+        updatePromises.push(saveTimeEntry(timeEntry));
       });
       Promise.all(updatePromises).then(() => resolve());
     });
@@ -48,118 +34,67 @@ function roundTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number): 
   timeEntry.hours = (Math.ceil(minutes / roundingInterval) * roundingInterval) / 60;
   return timeEntry;
 }
-export async function modifyDay(date: string, roundingInterval: number, config: Config): Promise<void> {
+export async function modifyDay(date: string, roundingInterval: number): Promise<void> {
   return new Promise((resolve) => {
-    getMyTimeEntriesPerDate(date, config).then((timeEntries) => {
+    getMyTimeEntriesPerDate(date).then((timeEntries) => {
       printTimeEntryTable(timeEntries);
-      chooseModifyTimeEntry(timeEntries).then((timeEntry) => {
-        modifyTimeEntry(timeEntry, roundingInterval, config).then(resolve);
+      askToChooseTimeEntryToModify(timeEntries).then((timeEntry) => {
+        modifyTimeEntry(timeEntry, roundingInterval).then(resolve);
       });
     });
   });
 }
 
-async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number, config: Config): Promise<void> {
+export enum TimeEntryModifyAction {
+  time,
+  notes,
+  round,
+  delete,
+}
+async function modifyTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number): Promise<void> {
   return new Promise((resolve) => {
-    const rl = createReadlineInterface({
-      input: process.stdin,
-      output: process.stdout,
+    askForTimeEntryModifyAction().then((modifyAction) => {
+      switch (modifyAction) {
+        case TimeEntryModifyAction.time:
+          setNewTimeEntryTime(timeEntry).then(resolve);
+          break;
+        case TimeEntryModifyAction.notes:
+          setNewTimeEntryNote(timeEntry).then(resolve);
+          break;
+        case TimeEntryModifyAction.round:
+          roundAndSaveTimeEntry(timeEntry, roundingInterval).then(resolve);
+          break;
+        case TimeEntryModifyAction.delete:
+          deleteTimeEntry(timeEntry).then(resolve);
+          break;
+      }
     });
-
-    rl.question(
-      'What do you want to modify? (Options: t - time, n - notes, r - round, d - delete): ',
-      async (modifyAction: string) => {
-        rl.close();
-        modifyAction = modifyAction.trim().toLowerCase();
-        if (modifyAction == 't' || modifyAction == 'time') {
-          await setNewTimeEntryTime(timeEntry, config);
-          resolve();
-        } else if (modifyAction == 'n' || modifyAction == 'notes') {
-          await setNewTimeEntryNote(timeEntry, config);
-          resolve();
-        } else if (modifyAction == 'r' || modifyAction == 'round') {
-          await roundAndSaveTimeEntry(timeEntry, roundingInterval, config);
-          resolve();
-        } else if (modifyAction == 'd' || modifyAction == 'delete') {
-          await deleteTimeEntry(timeEntry, config);
-          resolve();
-        } else {
-          process.stdout.write(`"${modifyAction}" is not a valid option.\n`);
-          resolve(await modifyTimeEntry(timeEntry, roundingInterval, config));
-        }
-      },
-    );
   });
 }
 
-async function roundAndSaveTimeEntry(
-  timeEntry: HarvestTimeEntry,
-  roundingInterval: number,
-  config: Config,
-): Promise<void> {
+async function roundAndSaveTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number): Promise<void> {
   return new Promise((resolve) => {
     timeEntry = roundTimeEntry(timeEntry, roundingInterval);
-    saveTimeEntry(timeEntry, config).then(() => resolve());
+    saveTimeEntry(timeEntry).then(() => resolve());
   });
 }
 
-async function setNewTimeEntryTime(timeEntry: HarvestTimeEntry, config: Config): Promise<void> {
+async function setNewTimeEntryTime(timeEntry: HarvestTimeEntry): Promise<void> {
   return new Promise((resolve) => {
-    const rl = createReadlineInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    rl.question('Set new time (in minutes) : ', async (time: string) => {
-      rl.close();
-      if (isNaN(Number(time))) {
-        process.stdout.write(`"${time}" is not a valid option.\n`);
-        resolve(await setNewTimeEntryTime(timeEntry, config));
-      }
-      const hours = Number(time) / 60;
-      if (hours < 0 || hours > 24) {
-        process.stdout.write(
-          `"${time}" is not a valid option. Time entry should be between 0 and 24 hours (0 and 1440 minutes).\n`,
-        );
-        resolve(await setNewTimeEntryTime(timeEntry, config));
-      }
+    askForNewHours().then((hours) => {
       timeEntry.hours = hours;
-      await saveTimeEntry(timeEntry, config);
-      resolve();
+      saveTimeEntry(timeEntry).then(() => resolve());
     });
   });
 }
 
-async function setNewTimeEntryNote(timeEntry: HarvestTimeEntry, config: Config): Promise<void> {
+async function setNewTimeEntryNote(timeEntry: HarvestTimeEntry): Promise<void> {
   return new Promise((resolve) => {
-    const rl = createReadlineInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    rl.question('Set new note : ', async (notes: string) => {
-      rl.close();
-      timeEntry.notes = notes;
-      await saveTimeEntry(timeEntry, config);
-      resolve();
-    });
-  });
-}
-
-async function chooseModifyTimeEntry(timeEntries: HarvestTimeEntry[]): Promise<HarvestTimeEntry> {
-  return new Promise((resolve) => {
-    const rl = createReadlineInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    rl.question('Please choose an entry (ID) to modify: ', async (entryId: string) => {
-      if (timeEntries[Number(entryId.trim())]) {
-        rl.close();
-        resolve(timeEntries[Number(entryId.trim())]);
-      } else {
-        rl.close();
-        process.stdout.write(`Entry ID "${entryId}" is not a valid option.\n`);
-        resolve(await chooseModifyTimeEntry(timeEntries));
-      }
+    askForNewNote().then((newNote) => {
+      timeEntry.notes = newNote;
+      saveTimeEntry(timeEntry).then(() => {
+        resolve();
+      });
     });
   });
 }
