@@ -39,7 +39,7 @@ export interface FileParserConfig {
   minutesColumn?: string;
 }
 
-const defaultConfig: Config = {
+export const defaultConfig: Config = {
   accountId: '',
   accessToken: '',
   aliasFilePath: '~/.config/harvey/aliases.json',
