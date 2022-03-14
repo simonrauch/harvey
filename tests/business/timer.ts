@@ -2,7 +2,7 @@ import nock from 'nock';
 import { HarveyTimerStatus, showTimer } from '../../src/business/timer';
 import sinon from 'sinon';
 import { defaultConfig, HarveyConfig } from '../../src/business/config';
-import chai from 'chai';
+import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 import * as timerCliOutput from '../../src/presentation/cli-output/timer';
 
@@ -11,6 +11,7 @@ chai.use(sinonChai);
 before(function () {
   HarveyConfig.setConfig(defaultConfig);
 });
+
 describe('stopped timer test', () => {
   it('should print stopped timer', async () => {
     nock('https://api.harvestapp.com:443', { encodedQueryParams: true }).get('/api/v2/users/me').query({}).reply(
@@ -46,12 +47,9 @@ describe('stopped timer test', () => {
         [],
       );
 
-    const timerCliOutputMock = sinon.mock(timerCliOutput);
-    timerCliOutputMock.expects('printTimer').calledOnceWith({ status: HarveyTimerStatus.stopped });
-
+    const printTimerStub = sinon.stub(timerCliOutput, 'printTimer').returns();
     await showTimer();
-
-    timerCliOutputMock.verify();
-    timerCliOutputMock.restore();
+    expect(printTimerStub).to.have.been.calledOnceWith({ status: HarveyTimerStatus.stopped });
+    printTimerStub.restore();
   });
 });
