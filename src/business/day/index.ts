@@ -7,6 +7,7 @@ import {
   askToChooseTimeEntryToModify,
 } from '../../presentation/user-input/day';
 import { printTimeEntryTable } from '../../presentation/cli-output/day';
+import { roundTimeEntry } from '../round';
 
 export async function printDay(date: string): Promise<void> {
   return new Promise((resolve) => {
@@ -28,11 +29,6 @@ export async function roundDay(date: string, roundingInterval: number): Promise<
       Promise.all(updatePromises).then(() => resolve());
     });
   });
-}
-function roundTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number): HarvestTimeEntry {
-  const minutes = timeEntry.hours * 60;
-  timeEntry.hours = (Math.ceil(minutes / roundingInterval) * roundingInterval) / 60;
-  return timeEntry;
 }
 export async function modifyDay(date: string, roundingInterval: number): Promise<void> {
   return new Promise((resolve) => {

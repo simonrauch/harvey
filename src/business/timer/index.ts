@@ -5,6 +5,7 @@ import { getRunningTimeEntry, restartTimeEntry, saveTimeEntry, stopTimeEntry } f
 import { deleteFile, readFromJsonFile, writeToJsonFile } from '../../service/filesystem';
 import { HarvestTimeEntry } from 'node-harvest-api';
 import { printTimer } from '../../presentation/cli-output/timer';
+import { roundTimeEntry } from '../round';
 
 export enum HarveyTimerStatus {
   stopped,
@@ -92,11 +93,23 @@ export function startTimer(alias: string, date: string, note: string): Promise<v
   });
 }
 
-export function updateTimer(date: string, note: string, addMinutes: number, subtractMinutes: number): Promise<void> {
+export function updateTimer(
+  date: string,
+  note: string,
+  addMinutes: number,
+  subtractMinutes: number,
+  round: boolean,
+  roundingInterval: number,
+): Promise<void> {
   return new Promise((resolve) => {
     const hourDiff = getHourTimeDiff(addMinutes, subtractMinutes);
-    const promises = [updateRunningTimer(date, note, hourDiff), updatePausedTimer(date, note, hourDiff)];
-    Promise.all(promises).then(() => resolve());
+    const promises = [
+      updateRunningTimer(date, note, hourDiff, round, roundingInterval),
+      updatePausedTimer(date, note, hourDiff, round, roundingInterval),
+    ];
+    Promise.all(promises).then(() => {
+      resolve();
+    });
   });
 }
 function getHourTimeDiff(addMinutes: number, subtractMinutes: number): number {
@@ -115,19 +128,36 @@ function setHourTimeDiffOnTimeEntry(timeEntry: HarvestTimeEntry, hourDiff: numbe
 
   return timeEntry;
 }
-async function updateRunningTimer(date: string, note: string, hourDiff: number): Promise<void> {
+async function updateRunningTimer(
+  date: string,
+  note: string,
+  hourDiff: number,
+  round: boolean,
+  roundingInterval: number,
+): Promise<void> {
   return new Promise((resolve) => {
     getRunningTimeEntry().then((activeTimer) => {
       if (activeTimer) {
         activeTimer.spent_date = date;
         activeTimer.notes = note;
         activeTimer = setHourTimeDiffOnTimeEntry(activeTimer, hourDiff);
+        if (round) {
+          activeTimer = roundTimeEntry(activeTimer, roundingInterval);
+        }
         saveTimeEntry(activeTimer).then(() => resolve());
+      } else {
+        resolve();
       }
     });
   });
 }
-async function updatePausedTimer(date: string, note: string, hourDiff: number): Promise<void> {
+async function updatePausedTimer(
+  date: string,
+  note: string,
+  hourDiff: number,
+  round: boolean,
+  roundingInterval: number,
+): Promise<void> {
   return new Promise((resolve) => {
     const config = HarveyConfig.getConfig();
     let pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
@@ -135,19 +165,31 @@ async function updatePausedTimer(date: string, note: string, hourDiff: number): 
       pausedTimer.spent_date = date;
       pausedTimer.notes = note;
       pausedTimer = setHourTimeDiffOnTimeEntry(pausedTimer, hourDiff);
-      saveTimeEntry(pausedTimer).then((updatedTimer) => writeToJsonFile(updatedTimer, config.pausedTimerFilePath));
+      if (round) {
+        pausedTimer = roundTimeEntry(pausedTimer, roundingInterval);
+      }
+      saveTimeEntry(pausedTimer).then((updatedTimer) => {
+        writeToJsonFile(updatedTimer, config.pausedTimerFilePath);
+        resolve();
+      });
     } else {
       resolve();
     }
   });
 }
-export function stopRunningTimer(): Promise<void> {
+export function stopRunningTimer(round: boolean, roundingInterval: number): Promise<void> {
   return new Promise((resolve) => {
     const config = HarveyConfig.getConfig();
     getRunningTimeEntry().then((activeTimer) => {
       deleteFile(config.pausedTimerFilePath);
       if (activeTimer) {
-        stopTimeEntry(activeTimer).then(() => resolve());
+        stopTimeEntry(activeTimer).then((stoppedTimer) => {
+          if (round) {
+            stoppedTimer = roundTimeEntry(stoppedTimer, roundingInterval);
+            saveTimeEntry(stoppedTimer).then(() => resolve());
+          }
+          resolve();
+        });
       } else {
         resolve();
       }

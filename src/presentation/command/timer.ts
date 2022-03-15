@@ -19,6 +19,8 @@ type Options = {
   action: string;
   add: number;
   subtract: number;
+  round: boolean;
+  rounding_interval?: number;
 };
 
 export const command = 'timer [<action>] [<alias>]';
@@ -32,6 +34,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
       add: { type: 'number', alias: 'a', default: 0 },
       subtract: { type: 'number', alias: 's', default: 0 },
+      round: { type: 'boolean', alias: 'r', default: false },
+      rounding_interval: { type: 'number', alias: 'ri' },
     })
     .positional('alias', { type: 'string', demandOption: false })
     .positional('action', {
@@ -41,10 +45,10 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const { config, alias, note, date, action, add, subtract } = argv;
+  const { config, alias, note, date, action, add, subtract, round, rounding_interval } = argv;
 
   try {
-    HarveyConfig.loadConfig(config);
+    const configuration = HarveyConfig.loadConfig(config);
     switch (action) {
       case 'start':
         if (!alias) {
@@ -54,7 +58,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         await showTimer();
         break;
       case 'stop':
-        await stopRunningTimer();
+        await stopRunningTimer(round, rounding_interval ?? configuration.defaultRoundingInterval);
         await showTimer();
         break;
       case 'pause':
@@ -66,7 +70,14 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         await showTimer();
         break;
       case 'update':
-        await updateTimer(convertDateInputToISODate(date), note, add, subtract);
+        await updateTimer(
+          convertDateInputToISODate(date),
+          note,
+          add,
+          subtract,
+          round,
+          rounding_interval ?? configuration.defaultRoundingInterval,
+        );
         await showTimer();
         break;
       case 'status':
