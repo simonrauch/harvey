@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { parseUserTimeInput } from '../../../src/presentation/user-input';
 
-describe('user time input parsing test', () => {
+describe('user time input parsing', () => {
   it('should interpret integer input as minutes', () => {
     expect(parseUserTimeInput('15')).to.be.equal(0.25);
     expect(parseUserTimeInput('90')).to.be.equal(1.5);

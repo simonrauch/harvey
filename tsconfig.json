@@ -9,9 +9,13 @@
     "outDir": "./build",
     "importHelpers": false,
     "typeRoots": [
-      "./src/@types",
+      "src/types",
       "./node_modules/@types"
     ]
+  },
+
+  "typingOptions": {
+    "enableAutoDiscovery": true
   },
   "include": ["src"],
   "exclude": [

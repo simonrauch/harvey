@@ -1,5 +1,4 @@
 import { deleteTimeEntry, getMyTimeEntriesPerDate, saveTimeEntry as saveTimeEntry } from '../../service/api/harvest';
-import { HarvestTimeEntry } from 'node-harvest-api';
 import {
   askForNewHours,
   askForNewNote,
@@ -8,6 +7,7 @@ import {
 } from '../../presentation/user-input/day';
 import { printTimeEntryTable } from '../../presentation/cli-output/day';
 import { roundTimeEntry } from '../round';
+import { HarvestTimeEntry } from '../harvest';
 
 export async function printDay(date: string): Promise<void> {
   return new Promise((resolve) => {

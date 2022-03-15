@@ -1,5 +1,5 @@
 import Table from 'cli-table';
-import { HarvestTimeEntry } from 'node-harvest-api';
+import { HarvestTimeEntry } from '../../business/harvest';
 import { formatTimerHours } from '../../business/helper';
 
 export function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {

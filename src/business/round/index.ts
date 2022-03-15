@@ -1,4 +1,4 @@
-import { HarvestTimeEntry } from 'node-harvest-api';
+import { HarvestTimeEntry } from '../harvest';
 
 export function roundTimeEntry(timeEntry: HarvestTimeEntry, roundingInterval: number): HarvestTimeEntry {
   const minutes = timeEntry.hours * 60;

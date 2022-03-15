@@ -1,6 +1,6 @@
-import { HarvestTimeEntry } from 'node-harvest-api';
 import { createReadlineInterface } from '.';
 import { TimeEntryModifyAction } from '../../business/day';
+import { HarvestTimeEntry } from '../../business/harvest';
 
 export async function askToChooseTimeEntryToModify(timeEntries: HarvestTimeEntry[]): Promise<HarvestTimeEntry> {
   return new Promise((resolve) => {

@@ -4,7 +4,7 @@ import { HarveyConfig } from '../../business/config';
 import { handleError } from '../../business/error';
 import { bookTimeEntry } from '../../service/api/harvest';
 import { convertDateInputToISODate, convertMinuteTimeInputToHours } from '../../business/helper';
-import { HarvestTimeEntry } from 'node-harvest-api';
+import { HarvestTimeEntry } from '../../business/harvest';
 
 type Options = {
   config: string;

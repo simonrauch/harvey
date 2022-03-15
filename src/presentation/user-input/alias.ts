@@ -1,5 +1,5 @@
-import { HarvestProjectTaskAssignment } from 'node-harvest-api';
 import { createReadlineInterface } from '.';
+import { HarvestProjectTaskAssignment } from '../../business/harvest';
 
 export async function askToChooseTaskProjectAssignmentForAliasing(
   projectTaskAssignments: HarvestProjectTaskAssignment[],

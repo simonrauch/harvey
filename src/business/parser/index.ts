@@ -5,7 +5,7 @@ import { bookTimeEntry } from '../../service/api/harvest';
 import { convertMinuteTimeInputToHours } from '../helper';
 import { CsvFileParser } from './file-parser/csv-file-parser';
 import { XlsxFileParser } from './file-parser/xlsx-file-parser';
-import { HarvestTimeEntry } from 'node-harvest-api';
+import { HarvestTimeEntry } from '../harvest';
 
 export interface FileParser {
   parserKey: string;

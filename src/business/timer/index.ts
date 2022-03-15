@@ -1,11 +1,10 @@
 import { getAliasOrCreate } from '../alias';
-import { HarveyConfig } from '../config';
 import { HarveyError } from '../error';
 import { getRunningTimeEntry, restartTimeEntry, saveTimeEntry, stopTimeEntry } from '../../service/api/harvest';
-import { deleteFile, readFromJsonFile, writeToJsonFile } from '../../service/filesystem';
-import { HarvestTimeEntry } from 'node-harvest-api';
 import { printTimer } from '../../presentation/cli-output/timer';
 import { roundTimeEntry } from '../round';
+import { readPausedTimer, storePausedTimer, deletePausedTimer } from '../../service/filesystem/timer';
+import { HarvestTimeEntry } from '../harvest';
 
 export enum HarveyTimerStatus {
   stopped,
@@ -39,8 +38,7 @@ export async function pauseActiveTimer(): Promise<void> {
         throw new HarveyError('No active timer to pause.');
       }
       stopTimeEntry(activeTimer).then((stoppedTimer) => {
-        const config = HarveyConfig.getConfig();
-        writeToJsonFile(stoppedTimer, config.pausedTimerFilePath);
+        storePausedTimer(stoppedTimer);
         resolve();
       });
     });
@@ -49,19 +47,18 @@ export async function pauseActiveTimer(): Promise<void> {
 
 export function resumePausedTimer(): Promise<void> {
   return new Promise((resolve) => {
-    const config = HarveyConfig.getConfig();
     getRunningTimeEntry().then((activeTimer) => {
-      const pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
+      const pausedTimer = readPausedTimer();
       if (!activeTimer && !pausedTimer) {
         throw new HarveyError('No paused timer to resume available.');
       }
       if (activeTimer) {
-        deleteFile(config.pausedTimerFilePath);
+        deletePausedTimer();
         resolve();
       }
       if (pausedTimer) {
         restartTimeEntry(pausedTimer).then(() => {
-          deleteFile(config.pausedTimerFilePath);
+          deletePausedTimer();
           resolve();
         });
       }
@@ -71,8 +68,7 @@ export function resumePausedTimer(): Promise<void> {
 
 export function startTimer(alias: string, date: string, note: string): Promise<void> {
   return new Promise((resolve) => {
-    const config = HarveyConfig.getConfig();
-    deleteFile(config.pausedTimerFilePath);
+    deletePausedTimer();
     getRunningTimeEntry().then((activeTimer) => {
       if (activeTimer) {
         throw new HarveyError('Timer already running. Please stop it, before starting a new one.');
@@ -159,8 +155,7 @@ async function updatePausedTimer(
   roundingInterval: number,
 ): Promise<void> {
   return new Promise((resolve) => {
-    const config = HarveyConfig.getConfig();
-    let pausedTimer = readFromJsonFile(config.pausedTimerFilePath);
+    let pausedTimer = readPausedTimer();
     if (pausedTimer) {
       pausedTimer.spent_date = date;
       pausedTimer.notes = note;
@@ -169,7 +164,7 @@ async function updatePausedTimer(
         pausedTimer = roundTimeEntry(pausedTimer, roundingInterval);
       }
       saveTimeEntry(pausedTimer).then((updatedTimer) => {
-        writeToJsonFile(updatedTimer, config.pausedTimerFilePath);
+        storePausedTimer(updatedTimer);
         resolve();
       });
     } else {
@@ -179,9 +174,8 @@ async function updatePausedTimer(
 }
 export function stopRunningTimer(round: boolean, roundingInterval: number): Promise<void> {
   return new Promise((resolve) => {
-    const config = HarveyConfig.getConfig();
     getRunningTimeEntry().then((activeTimer) => {
-      deleteFile(config.pausedTimerFilePath);
+      deletePausedTimer();
       if (activeTimer) {
         stopTimeEntry(activeTimer).then((stoppedTimer) => {
           if (round) {
@@ -198,6 +192,5 @@ export function stopRunningTimer(round: boolean, roundingInterval: number): Prom
 }
 
 function getPausedTimer(): HarvestTimeEntry | null {
-  const config = HarveyConfig.getConfig();
-  return readFromJsonFile(config.pausedTimerFilePath);
+  return readPausedTimer();
 }

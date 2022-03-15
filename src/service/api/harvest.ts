@@ -1,16 +1,24 @@
 import { HarveyConfig } from '../../business/config';
-import Harvest, {
+import Harvest from 'node-harvest-api';
+import { HarveyError } from '../../business/error';
+import {
   HarvestProjectAssignment,
   HarvestProjectTaskAssignment,
   HarvestTimeEntry,
   HarvestUser,
-} from 'node-harvest-api';
-import { HarveyError } from '../../business/error';
+} from '../../business/harvest';
 
-let projectTaskAssignmentCache: Array<HarvestProjectTaskAssignment>;
-let projectAssignmentCache: Array<HarvestProjectAssignment>;
-let authenticatedUserIdCache: number;
-let harvestSdk: Harvest;
+let projectTaskAssignmentCache: Array<HarvestProjectTaskAssignment> | null;
+let projectAssignmentCache: Array<HarvestProjectAssignment> | null;
+let authenticatedUserIdCache: number | null;
+let harvestSdk: Harvest | null;
+
+export function resetHarvestCache(): void {
+  projectAssignmentCache = null;
+  projectAssignmentCache = null;
+  authenticatedUserIdCache = null;
+  harvestSdk = null;
+}
 
 export function getHarvestSdk(): Harvest {
   if (!harvestSdk) {
