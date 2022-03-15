@@ -23,11 +23,11 @@ export async function addAlias(aliasKey: string, searchString?: string): Promise
       );
 
       if (filteredProjectTaskAssignments.length === 0) {
-        throw new Error(`Task "${searchString}" was not found.`);
+        throw new Error(`Task "${aliasSearchTerm}" was not found.`);
       }
 
       if (filteredProjectTaskAssignments.length > 10) {
-        throw new Error(`Too many tasks for "${searchString}" were found. Please use a more specific alias.`);
+        throw new Error(`Too many tasks for "${aliasSearchTerm}" were found. Please use a more specific alias.`);
       }
 
       findSingleProjectTaskAssignment(aliasKey, filteredProjectTaskAssignments).then((projectTaskAssignment) => {
