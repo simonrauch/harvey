@@ -6,6 +6,7 @@ import { handleError, HarveyError } from '../../business/error';
 type Options = {
   config: string;
   alias?: string;
+  search?: string;
   action: string;
 };
 
@@ -15,6 +16,7 @@ export const desc = 'Manages Harvey aliases.';
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
+      search: { type: 'string', alias: 's' },
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
     })
     .positional('alias', { type: 'string', demandOption: false })
@@ -25,7 +27,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const { config, alias, action } = argv;
+  const { config, alias, action, search } = argv;
 
   try {
     HarveyConfig.loadConfig(config);
@@ -34,7 +36,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         if (!alias) {
           throw new HarveyError('<alias> is required to add an alias.');
         }
-        await addAlias(alias);
+        await addAlias(alias, search);
         break;
       case 'remove':
         if (!alias) {

@@ -14,7 +14,7 @@ export function readAliasFile(): Map<string, Alias> {
 }
 
 export function writeAliasFile(aliases: Map<string, Alias>): void {
-  const filePath = HarveyConfig.getConfig().aliasFilePath;
+  const filePath = transformPath(HarveyConfig.getConfig().aliasFilePath);
   if (!fs.existsSync(path.dirname(filePath))) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
   }

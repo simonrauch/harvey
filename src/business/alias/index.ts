@@ -12,21 +12,22 @@ export interface Alias {
 
 class AliasNotFoundError extends HarveyError {}
 
-export async function addAlias(aliasKey: string): Promise<Alias> {
+export async function addAlias(aliasKey: string, searchString?: string): Promise<Alias> {
   return new Promise((resolve) => {
+    const aliasSearchTerm = searchString ?? aliasKey;
     getMyProjectTaskAssignments().then((projectTaskAssignments) => {
       const filteredProjectTaskAssignments = projectTaskAssignments.filter(
         (projectTaskAssignment: HarvestProjectTaskAssignment) => {
-          return projectTaskAssignment.task.name.includes(aliasKey);
+          return projectTaskAssignment.task.name.includes(aliasSearchTerm);
         },
       );
 
       if (filteredProjectTaskAssignments.length === 0) {
-        throw new Error(`Task "${aliasKey}" was not found.`);
+        throw new Error(`Task "${searchString}" was not found.`);
       }
 
       if (filteredProjectTaskAssignments.length > 10) {
-        throw new Error(`Too many tasks for "${aliasKey}" were found. Please use a more specific alias.`);
+        throw new Error(`Too many tasks for "${searchString}" were found. Please use a more specific alias.`);
       }
 
       findSingleProjectTaskAssignment(aliasKey, filteredProjectTaskAssignments).then((projectTaskAssignment) => {
