@@ -142,6 +142,7 @@ async function updateRunningTimer(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     getRunningTimeEntry().then((activeTimer) => {
+      console.log(activeTimer?.hours);
       if (activeTimer) {
         try {
           activeTimer = setUpdatesOnTimeEntry(activeTimer, date, note, hourDiff, round, roundingInterval);
