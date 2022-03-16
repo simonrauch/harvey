@@ -3,15 +3,14 @@ import { getAliasOrCreate } from '../../business/alias';
 import { HarveyConfig } from '../../business/config';
 import { handleError } from '../../business/error';
 import { bookTimeEntry } from '../../service/api/harvest';
-import { convertDateInputToISODate } from '../../business/helper';
 import { HarvestTimeEntry } from '../../business/harvest';
-import { parseUserTimeInput } from '../user-input';
+import { parseUserDateInput, parseUserTimeInput } from '../user-input';
 
 type Options = {
   config: string;
   alias: string;
   note: string;
-  date: string;
+  date?: string;
   time: string;
 };
 
@@ -23,7 +22,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .options({
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
       note: { type: 'string', alias: 'n', default: '' },
-      date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
+      date: { type: 'string', alias: 'd' },
     })
     .positional('alias', { type: 'string', demandOption: true })
     .positional('time', { type: 'string', demandOption: true });
@@ -39,7 +38,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
       project_id: harvestAlias.idProject,
       hours: parseUserTimeInput(time),
       notes: note,
-      spent_date: convertDateInputToISODate(date),
+      spent_date: parseUserDateInput(date),
     };
     await bookTimeEntry(timeEntry);
   } catch (error) {

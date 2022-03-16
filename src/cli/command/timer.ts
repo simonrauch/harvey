@@ -1,7 +1,6 @@
 import type { Arguments, CommandBuilder } from 'yargs';
 import { HarveyConfig } from '../../business/config';
 import { handleError, HarveyError } from '../../business/error';
-import { convertDateInputToISODate } from '../../business/helper';
 import {
   pauseActiveTimer,
   showTimer,
@@ -10,7 +9,7 @@ import {
   stopRunningTimer,
   updateTimer,
 } from '../../business/timer';
-import { parseUserTimeInput } from '../user-input';
+import { parseUserDateInput, parseUserTimeInput } from '../user-input';
 
 type Options = {
   config: string;
@@ -55,7 +54,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         if (!alias) {
           throw new HarveyError('<alias> is required to start a timer.');
         }
-        await startTimer(alias, date ? convertDateInputToISODate(date) : convertDateInputToISODate(), note ?? '');
+        await startTimer(alias, date ? parseUserDateInput(date) : parseUserDateInput(), note ?? '');
         await showTimer();
         break;
       case 'stop':
@@ -72,7 +71,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         break;
       case 'update':
         await updateTimer(
-          date ? convertDateInputToISODate(date) : null,
+          date ? parseUserDateInput(date) : null,
           note ?? null,
           add ? parseUserTimeInput(add) : null,
           subtract ? parseUserTimeInput(subtract) : null,
