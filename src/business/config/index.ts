@@ -1,3 +1,4 @@
+import { printMessage } from '../../cli/cli-output';
 import { askForHarvestAccountId, askForPersonalAccessToken } from '../../cli/user-input/config';
 import { isAccountIdAndTokenValid } from '../../service/api/harvest';
 import { readConfigFile, writeConfigFile } from '../../service/filesystem/config';
@@ -63,10 +64,10 @@ export async function initializeConfig(filePath: string): Promise<void> {
         isAccountIdAndTokenValid(newConfig.accountId, newConfig.accessToken).then((credentialsAreValid) => {
           if (credentialsAreValid) {
             writeConfigFile(newConfig, filePath);
-            process.stdout.write(`Sucessfully generated config ${filePath}\n`);
+            printMessage(`Sucessfully generated config "${filePath}".`);
             resolve();
           } else {
-            process.stdout.write('Could not authenticate, please try again.\n');
+            printMessage('Could not authenticate, please try again.');
             initializeConfig(filePath).then(resolve);
           }
         });

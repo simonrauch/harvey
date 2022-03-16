@@ -3,6 +3,7 @@ import { HarveyError } from '../error';
 import { readAliasFile, writeAliasFile } from '../../service/filesystem/alias';
 import { askToChooseTaskProjectAssignmentForAliasing } from '../../cli/user-input/alias';
 import { HarvestProjectTaskAssignment } from '../harvest';
+import { printMessage } from '../../cli/cli-output';
 
 export interface Alias {
   alias: string;
@@ -88,9 +89,9 @@ async function findSingleProjectTaskAssignment(
       resolve(projectTaskAssignments[0]);
       return;
     }
-    process.stdout.write(`Multiple tasks for "${aliasKey}" were found: \n`);
+    printMessage(`Multiple tasks for "${aliasKey}" were found:`);
     projectTaskAssignments.forEach((projectTaskAssignment, index) => {
-      process.stdout.write(`${index} - ${projectTaskAssignment.task.name} (${projectTaskAssignment.project.name}) \n`);
+      printMessage(`${index} - ${projectTaskAssignment.task.name} (${projectTaskAssignment.project.name})`);
     });
     askToChooseTaskProjectAssignmentForAliasing(projectTaskAssignments).then(resolve);
   });

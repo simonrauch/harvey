@@ -1,5 +1,6 @@
 import { createReadlineInterface } from '.';
 import { HarvestProjectTaskAssignment } from '../../business/harvest';
+import { printMessage } from '../cli-output';
 
 export async function askToChooseTaskProjectAssignmentForAliasing(
   projectTaskAssignments: HarvestProjectTaskAssignment[],
@@ -10,10 +11,10 @@ export async function askToChooseTaskProjectAssignmentForAliasing(
       rl.close();
       const index = Number(numberEntered);
       if (isNaN(index)) {
-        process.stdout.write(`${index} is not a number. Please try again.\n`);
+        printMessage(`${index} is not a number. Please try again.`);
         askToChooseTaskProjectAssignmentForAliasing(projectTaskAssignments).then(resolve);
       } else if (!projectTaskAssignments[index]) {
-        process.stdout.write(`${index} is not a valid option. Please try again.\n`);
+        printMessage(`${index} is not a valid option. Please try again.`);
         askToChooseTaskProjectAssignmentForAliasing(projectTaskAssignments).then(resolve);
       } else {
         resolve(projectTaskAssignments[index]);
