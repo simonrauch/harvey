@@ -1,6 +1,6 @@
 name: CD
 on:
-  push:
+  create:
     tags: 
       - 'v*'
 jobs:
