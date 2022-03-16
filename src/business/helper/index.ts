@@ -1,5 +1,3 @@
-import { HarveyError } from '../error';
-
 export function convertDateInputToISODate(dateInput?: string): string {
   const date = dateInput ? new Date(dateInput) : new Date();
   // TODO check if date input is correct

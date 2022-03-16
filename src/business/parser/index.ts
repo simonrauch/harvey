@@ -5,7 +5,6 @@ import { bookTimeEntry } from '../../service/api/harvest';
 import { CsvFileParser } from './file-parser/csv-file-parser';
 import { XlsxFileParser } from './file-parser/xlsx-file-parser';
 import { HarvestTimeEntry } from '../harvest';
-import { parseUserTimeInput } from '../../cli/user-input';
 
 export interface FileParser {
   parserKey: string;
