@@ -11,6 +11,16 @@ export class InvalidTimeInputHarveyError extends HarveyError {
   }
 }
 
+export class InvalidDateInputHarveyError extends HarveyError {
+  constructor(message?: string) {
+    if (message) {
+      super(message);
+    } else {
+      super('Invalid date input.');
+    }
+  }
+}
+
 export function createReadlineInterface(): Interface {
   return createInterface({
     input: process.stdin,
@@ -59,4 +69,20 @@ function convertUserInputTimeStringToHourNumber(timeInput: string): number {
   }
 
   throw new InvalidTimeInputHarveyError();
+}
+
+export function parseUserDateInput(dateInput?: string): string {
+  if (dateInput === undefined || dateInput === null || dateInput === '') {
+    return formatDate(new Date());
+  }
+  const isoDateRegex = new RegExp('^([0-9]{4})(-?)(1[0-2]|0[1-9])\\2(3[01]|0[1-9]|[12][0-9])$');
+  const date = new Date(dateInput);
+  if (date.toDateString() === 'Invalid Date' || !isoDateRegex.test(dateInput)) {
+    throw new InvalidDateInputHarveyError();
+  }
+  return formatDate(date);
+}
+
+function formatDate(date: Date): string {
+  return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`;
 }

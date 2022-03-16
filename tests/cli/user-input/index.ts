@@ -1,5 +1,20 @@
 import { expect } from 'chai';
-import { parseUserTimeInput } from '../../../src/cli/user-input';
+import sinon, { SinonFakeTimers, SinonSandbox } from 'sinon';
+import { defaultConfig, HarveyConfig } from '../../../src/business/config';
+import { parseUserDateInput, parseUserTimeInput } from '../../../src/cli/user-input';
+
+const fixedDate = new Date('2020-05-04');
+let sandbox: SinonSandbox, clock: SinonFakeTimers;
+
+beforeEach(() => {
+  HarveyConfig.setConfig(defaultConfig);
+  sandbox = sinon.createSandbox();
+  clock = sinon.useFakeTimers(fixedDate.getTime());
+});
+afterEach(() => {
+  sandbox.restore();
+  clock.restore();
+});
 
 describe('user time input parsing', () => {
   it('should interpret integer input as minutes', () => {
@@ -72,6 +87,35 @@ describe('user time input parsing', () => {
     }).to.throw('Invalid time input. Time input has be between 0 and 24 hours.');
   });
 });
-describe('User date input parsing test', () => {
-  //TODO
+
+describe('user date input parsing', () => {
+  it('should interpret empty string as current date', () => {
+    expect(parseUserDateInput('')).to.be.equal('2020-05-04');
+  });
+  it('should interpret undefined input string as current date', () => {
+    expect(parseUserDateInput()).to.be.equal('2020-05-04');
+  });
+  it('should interpret iso date string', () => {
+    expect(parseUserDateInput('2020-12-18')).to.be.equal('2020-12-18');
+  });
+  it('should throw error on invalid dates', () => {
+    expect(() => {
+      parseUserDateInput('2020-13-18');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('asdf');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('15');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('1');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('-1');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('-20');
+    }).to.throw('Invalid date input.');
+  });
 });
