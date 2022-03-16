@@ -90,18 +90,23 @@ export function startTimer(alias: string, date: string, note: string): Promise<v
 }
 
 export function updateTimer(
-  date: string,
-  note: string,
-  addMinutes: number,
-  subtractMinutes: number,
-  round: boolean,
+  date: string | null,
+  note: string | null,
+  addMinutes: number | null,
+  subtractMinutes: number | null,
+  round: boolean | null,
   roundingInterval: number,
 ): Promise<void> {
   return new Promise((resolve) => {
-    const hourDiff = getHourTimeDiff(addMinutes, subtractMinutes);
+    const hourDiff = getHourTimeDiff(addMinutes ?? 0, subtractMinutes ?? 0);
+
+    if (hourDiff !== 0 && round) {
+      throw new HarveyError('Rounding and adding/subtracting are exclusive timer actions. Please only use one.');
+    }
+
     const promises = [
-      updateRunningTimer(date, note, hourDiff, round, roundingInterval),
-      updatePausedTimer(date, note, hourDiff, round, roundingInterval),
+      updateRunningTimer(date, note, hourDiff, round ?? false, roundingInterval),
+      updatePausedTimer(date, note, hourDiff, round ?? false, roundingInterval),
     ];
     Promise.all(promises).then(() => {
       resolve();
@@ -125,8 +130,8 @@ function setHourTimeDiffOnTimeEntry(timeEntry: HarvestTimeEntry, hourDiff: numbe
   return timeEntry;
 }
 async function updateRunningTimer(
-  date: string,
-  note: string,
+  date: string | null,
+  note: string | null,
   hourDiff: number,
   round: boolean,
   roundingInterval: number,
@@ -134,8 +139,8 @@ async function updateRunningTimer(
   return new Promise((resolve) => {
     getRunningTimeEntry().then((activeTimer) => {
       if (activeTimer) {
-        activeTimer.spent_date = date;
-        activeTimer.notes = note;
+        if (date) activeTimer.spent_date = date;
+        if (note) activeTimer.notes = note;
         activeTimer = setHourTimeDiffOnTimeEntry(activeTimer, hourDiff);
         if (round) {
           activeTimer = roundTimeEntry(activeTimer, roundingInterval);
@@ -148,8 +153,8 @@ async function updateRunningTimer(
   });
 }
 async function updatePausedTimer(
-  date: string,
-  note: string,
+  date: string | null,
+  note: string | null,
   hourDiff: number,
   round: boolean,
   roundingInterval: number,
@@ -157,8 +162,8 @@ async function updatePausedTimer(
   return new Promise((resolve) => {
     let pausedTimer = readPausedTimer();
     if (pausedTimer) {
-      pausedTimer.spent_date = date;
-      pausedTimer.notes = note;
+      if (date) pausedTimer.spent_date = date;
+      if (note) pausedTimer.notes = note;
       pausedTimer = setHourTimeDiffOnTimeEntry(pausedTimer, hourDiff);
       if (round) {
         pausedTimer = roundTimeEntry(pausedTimer, roundingInterval);

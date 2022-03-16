@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { HarveyTimerStatus, showTimer } from '../../src/business/timer';
+import { HarveyTimerStatus, showTimer, updateTimer } from '../../src/business/timer';
 import sinon from 'sinon';
 import { defaultConfig, HarveyConfig } from '../../src/business/config';
 import chai, { expect } from 'chai';
@@ -7,6 +7,7 @@ import sinonChai from 'sinon-chai';
 import * as timerCliOutput from '../../src/presentation/cli-output/timer';
 import { resetHarvestCache } from '../../src/service/api/harvest';
 import * as timerFileSystem from '../../src/service/filesystem/timer';
+import * as harvestApi from '../../src/service/api/harvest';
 import { HarvestTimeEntry } from '../../src/business/harvest';
 
 chai.use(sinonChai);
@@ -32,7 +33,7 @@ const timeEntryNotRunning = {
   id: 666,
   spent_date: '2022-03-15',
   hours: 0.12,
-  notes: null,
+  notes: 'note',
   timer_started_at: '2022-03-15T12:04:45Z',
   is_running: false,
   created_at: '2022-03-15T12:04:45Z',
@@ -128,6 +129,78 @@ describe('timer status', () => {
     });
     expect(readPausedTimerStub).to.have.been.calledOnce;
     printTimerStub.restore();
+    readPausedTimerStub.restore();
+  });
+});
+
+describe('timer update', () => {
+  it('should update running timers note', async () => {
+    interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
+    const expectedUpdatedTimeEntry = { ...timeEntryRunning, notes: 'note updated' };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+
+    await updateTimer(null, 'note updated', null, null, false, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+  });
+
+  it('should update running timers date', async () => {
+    interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
+    const expectedUpdatedTimeEntry = { ...timeEntryRunning, spent_date: '2022-03-10' };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+
+    await updateTimer('2022-03-10', null, null, null, false, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+  });
+
+  it('should round running timer', async () => {
+    interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
+    const expectedUpdatedTimeEntry = { ...timeEntryRunning, hours: 0.25 };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+
+    await updateTimer(null, null, null, null, true, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+  });
+
+  it('should add time to running timer', async () => {
+    interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
+    const expectedUpdatedTimeEntry = { ...timeEntryRunning, hours: 0.37 };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+
+    await updateTimer(null, null, 15, null, false, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+  });
+
+  it('should subtract time from running timer', async () => {
+    interceptGetTimeEntryRequestAndRespondWith([{ ...timeEntryRunning, hours: 0.25 }]);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
+    const expectedUpdatedTimeEntry = { ...timeEntryRunning, hours: 0.15 };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+
+    await updateTimer(null, null, null, 6, false, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    saveTimeEntryStub.restore();
     readPausedTimerStub.restore();
   });
 });

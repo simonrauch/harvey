@@ -14,8 +14,8 @@ import {
 type Options = {
   config: string;
   alias?: string;
-  note: string;
-  date: string;
+  note?: string;
+  date?: string;
   action: string;
   add: number;
   subtract: number;
@@ -30,8 +30,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
-      note: { type: 'string', alias: 'n', default: '' },
-      date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
+      note: { type: 'string', alias: 'n' },
+      date: { type: 'string', alias: 'd', describe: 'timers date, format: "YYYY-MM-DD"' },
       add: { type: 'number', alias: 'a', default: 0 },
       subtract: { type: 'number', alias: 's', default: 0 },
       round: { type: 'boolean', alias: 'r', default: false },
@@ -54,7 +54,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         if (!alias) {
           throw new HarveyError('<alias> is required to start a timer.');
         }
-        await startTimer(alias, convertDateInputToISODate(date), note);
+        await startTimer(alias, date ? convertDateInputToISODate(date) : convertDateInputToISODate(), note ?? '');
         await showTimer();
         break;
       case 'stop':
@@ -71,8 +71,8 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         break;
       case 'update':
         await updateTimer(
-          convertDateInputToISODate(date),
-          note,
+          date ? convertDateInputToISODate(date) : null,
+          note ?? null,
           add,
           subtract,
           round,
