@@ -1,10 +1,10 @@
-name: Create release
+name: Version
 on:
   workflow_dispatch:
     inputs:
-      release-type:
+      version-type:
         type: choice
-        description: Release type
+        description: Version type
         options:
           - patch
           - minor
@@ -71,6 +71,6 @@ jobs:
       - name: Set comitter email
         run: git config --global user.email 'sr@simonrauch.com'
       - name: Bump version
-        run: npm version ${{ github.event.inputs.release-type }}
+        run: npm version ${{ github.event.inputs.version-type }}
       - name: Push versioning commit 
         run: git push --follow-tags
