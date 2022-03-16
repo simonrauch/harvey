@@ -143,18 +143,15 @@ async function updateRunningTimer(
   return new Promise((resolve, reject) => {
     getRunningTimeEntry().then((activeTimer) => {
       if (activeTimer) {
-        if (date) activeTimer.spent_date = date;
-        if (note) activeTimer.notes = note;
         try {
-          activeTimer = setHourTimeDiffOnTimeEntry(activeTimer, hourDiff);
+          activeTimer = setUpdatesOnTimeEntry(activeTimer, date, note, hourDiff, round, roundingInterval);
         } catch (error) {
           reject(error);
           return;
         }
-        if (round) {
-          activeTimer = roundTimeEntry(activeTimer, roundingInterval);
-        }
-        saveTimeEntry(activeTimer).then(() => resolve());
+        saveTimeEntry(activeTimer)
+          .then(() => resolve())
+          .catch(reject);
       } else {
         resolve();
       }
@@ -171,25 +168,38 @@ async function updatePausedTimer(
   return new Promise((resolve, reject) => {
     let pausedTimer = readPausedTimer();
     if (pausedTimer) {
-      if (date) pausedTimer.spent_date = date;
-      if (note) pausedTimer.notes = note;
-      if (round) {
-        pausedTimer = roundTimeEntry(pausedTimer, roundingInterval);
-      }
       try {
-        pausedTimer = setHourTimeDiffOnTimeEntry(pausedTimer, hourDiff);
+        pausedTimer = setUpdatesOnTimeEntry(pausedTimer, date, note, hourDiff, round, roundingInterval);
       } catch (error) {
         reject(error);
         return;
       }
-      saveTimeEntry(pausedTimer).then((updatedTimer) => {
-        storePausedTimer(updatedTimer);
-        resolve();
-      });
+      saveTimeEntry(pausedTimer)
+        .then((updatedTimer) => {
+          storePausedTimer(updatedTimer);
+          resolve();
+        })
+        .catch(reject);
     } else {
       resolve();
     }
   });
+}
+function setUpdatesOnTimeEntry(
+  timeEntry: HarvestTimeEntry,
+  date: string | null,
+  note: string | null,
+  hourDiff: number,
+  round: boolean,
+  roundingInterval: number,
+): HarvestTimeEntry {
+  if (date) timeEntry.spent_date = date;
+  if (note) timeEntry.notes = note;
+  if (round) {
+    timeEntry = roundTimeEntry(timeEntry, roundingInterval);
+  }
+  timeEntry = setHourTimeDiffOnTimeEntry(timeEntry, hourDiff);
+  return timeEntry;
 }
 export function stopRunningTimer(round: boolean, roundingInterval: number): Promise<void> {
   return new Promise((resolve) => {
