@@ -108,6 +108,7 @@ jobs:
     name: "Create GitHub release"
     needs: [test, lint, build]
     runs-on: "ubuntu-latest"
+    steps:
       - name: "Create Github release"
         uses: "marvinpinto/action-automatic-releases@v1"
         with:
