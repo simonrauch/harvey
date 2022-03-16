@@ -1,0 +1,71 @@
+name: Create release
+on:
+  workflow_dispatch:
+    inputs:
+      release-type:
+        type: choice
+        description: Release type
+        options:
+          - major
+          - minor
+          - patch
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Restore Cache
+        uses: ./.github/actions/cache-restore
+        id: cache-node-modules
+      - name: Install node_modules
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+  lint:
+    name: Lint
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Restore Cache
+        uses: ./.github/actions/cache-restore
+      - name: Run Prettier
+        run: npm run prettier
+      - name: Run EsLint
+        run: npm run eslint
+  build:
+    name: Build
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Restore Cache
+        uses: ./.github/actions/cache-restore
+        id: cache-node-modules
+      - name: Run build
+        run: npm run build
+  test:
+    name: Test
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Restore Cache
+        uses: ./.github/actions/cache-restore
+        id: cache-node-modules
+      - name: Run tests
+        run: npm test
+  bump-npm-version:
+    name: Bump NPM version
+    need: [test, build, lint]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Bump version
+        run: npm version ${{ github.event.inputs.release-type }}
+      - name: Push versioning commit 
+        run: git push --follow-tags
