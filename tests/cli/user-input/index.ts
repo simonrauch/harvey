@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { parseUserTimeInput } from '../../../src/presentation/user-input';
+import { parseUserTimeInput } from '../../../src/cli/user-input';
 
 describe('user time input parsing', () => {
   it('should interpret integer input as minutes', () => {

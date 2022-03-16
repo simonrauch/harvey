@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import { defaultConfig, HarveyConfig } from '../../src/business/config';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
-import * as timerCliOutput from '../../src/presentation/cli-output/timer';
+import * as timerCliOutput from '../../src/cli/cli-output/timer';
 import { resetHarvestCache } from '../../src/service/api/harvest';
 import * as timerFileSystem from '../../src/service/filesystem/timer';
 import * as harvestApi from '../../src/service/api/harvest';

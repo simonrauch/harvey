@@ -1,4 +1,4 @@
-import { askForHarvestAccountId, askForPersonalAccessToken } from '../../presentation/user-input/config';
+import { askForHarvestAccountId, askForPersonalAccessToken } from '../../cli/user-input/config';
 import { isAccountIdAndTokenValid } from '../../service/api/harvest';
 import { readConfigFile, writeConfigFile } from '../../service/filesystem/config';
 

@@ -1,7 +1,7 @@
 import { getMyProjectTaskAssignments } from '../../service/api/harvest';
 import { HarveyError } from '../error';
 import { readAliasFile, writeAliasFile } from '../../service/filesystem/alias';
-import { askToChooseTaskProjectAssignmentForAliasing } from '../../presentation/user-input/alias';
+import { askToChooseTaskProjectAssignmentForAliasing } from '../../cli/user-input/alias';
 import { HarvestProjectTaskAssignment } from '../harvest';
 
 export interface Alias {

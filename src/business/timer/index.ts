@@ -1,7 +1,7 @@
 import { getAliasOrCreate } from '../alias';
 import { HarveyError } from '../error';
 import { getRunningTimeEntry, restartTimeEntry, saveTimeEntry, stopTimeEntry } from '../../service/api/harvest';
-import { printTimer } from '../../presentation/cli-output/timer';
+import { printTimer } from '../../cli/cli-output/timer';
 import { roundTimeEntry } from '../round';
 import { readPausedTimer, storePausedTimer, deletePausedTimer } from '../../service/filesystem/timer';
 import { HarvestTimeEntry } from '../harvest';

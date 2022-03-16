@@ -3,7 +3,7 @@
   "version": "2.3.17",
   "description": "A simple CLI for Harvest.",
   "bin": {
-    "harvey": "./build/cli.js"
+    "harvey": "./build/cli/index.js"
   },
   "files": [
     "build/**/*"
@@ -20,7 +20,7 @@
     "prettier:fix": "prettier --write './**/*.ts'",
     "eslint": "eslint . --ext .ts",
     "eslint:fix": "eslint . --ext .ts --fix",
-    "build": "rm -rf build && npx tsc && chmod +x build/cli.js",
+    "build": "rm -rf build && npx tsc && chmod +x build/cli/index.js",
     "dev": "npm run build && npx tsc --watch",
     "test": "mocha -r ts-node/register 'tests/**/*.ts'",
     "prepare": "husky install; npm run build",

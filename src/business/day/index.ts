@@ -4,8 +4,8 @@ import {
   askForNewNote,
   askForTimeEntryModifyAction,
   askToChooseTimeEntryToModify,
-} from '../../presentation/user-input/day';
-import { printTimeEntryTable } from '../../presentation/cli-output/day';
+} from '../../cli/user-input/day';
+import { printTimeEntryTable } from '../../cli/cli-output/day';
 import { roundTimeEntry } from '../round';
 import { HarvestTimeEntry } from '../harvest';
 
