@@ -1,5 +1,6 @@
 import { Cell, Workbook, Worksheet } from 'exceljs';
 import type { FileParser, ParserBookingEntry } from '..';
+import { parseUserTimeInput } from '../../../cli/user-input';
 import { HarveyConfig } from '../../config';
 import { HarveyError } from '../../error';
 
@@ -19,7 +20,7 @@ export class XlsxFileParser implements FileParser {
         while (aliasCell.text) {
           entries.push({
             alias: aliasCell.text,
-            minutes: Number(minutesCell.text),
+            hours: parseUserTimeInput(minutesCell.text),
           });
           aliasCell = worksheet.getCell(aliasCell.row + 1, aliasCell.col);
           minutesCell = worksheet.getCell(minutesCell.row + 1, minutesCell.col);

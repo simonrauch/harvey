@@ -1,4 +1,4 @@
-import { createReadlineInterface } from '.';
+import { createReadlineInterface, InvalidTimeInputHarveyError, parseUserTimeInput } from '.';
 import { TimeEntryModifyAction } from '../../business/day';
 import { HarvestTimeEntry } from '../../business/harvest';
 import { printMessage } from '../cli-output';
@@ -33,20 +33,24 @@ export async function askForNewNote(): Promise<string> {
 export async function askForNewHours(): Promise<number> {
   return new Promise((resolve) => {
     const rl = createReadlineInterface();
-    rl.question('Set new time (in minutes) : ', async (time: string) => {
+    rl.question('Set new time : ', async (time: string) => {
       rl.close();
-      if (isNaN(Number(time))) {
-        printMessage(`"${time}" is not a valid option. Please try again.`);
-        askForNewHours().then(resolve);
-      } else {
-        const hours = Number(time) / 60;
+      try {
+        const hours = parseUserTimeInput(time);
         if (hours < 0 || hours > 24) {
           printMessage(
-            `"${time}" is not a valid option. Time entry should be between 0 and 24 hours (0 and 1440 minutes). Please try again.`,
+            `"${time}" is not a valid option. Time entry should be between 0 and 24 hours. Please try again.`,
           );
           askForNewHours().then(resolve);
         } else {
           resolve(hours);
+        }
+      } catch (error) {
+        if (error instanceof InvalidTimeInputHarveyError) {
+          printMessage(`"${time}" is not a valid option. Please try again.`);
+          askForNewHours().then(resolve);
+        } else {
+          throw error;
         }
       }
     });

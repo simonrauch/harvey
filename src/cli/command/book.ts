@@ -3,18 +3,19 @@ import { getAliasOrCreate } from '../../business/alias';
 import { HarveyConfig } from '../../business/config';
 import { handleError } from '../../business/error';
 import { bookTimeEntry } from '../../service/api/harvest';
-import { convertDateInputToISODate, convertMinuteTimeInputToHours } from '../../business/helper';
+import { convertDateInputToISODate } from '../../business/helper';
 import { HarvestTimeEntry } from '../../business/harvest';
+import { parseUserTimeInput } from '../user-input';
 
 type Options = {
   config: string;
   alias: string;
   note: string;
   date: string;
-  minutes: number;
+  time: string;
 };
 
-export const command = 'book <alias> <minutes>';
+export const command = 'book <alias> <time>';
 export const desc = 'Creates a harvest time entry.';
 
 export const builder: CommandBuilder<Options, Options> = (yargs) =>
@@ -25,10 +26,10 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
     })
     .positional('alias', { type: 'string', demandOption: true })
-    .positional('minutes', { type: 'number', demandOption: true });
+    .positional('time', { type: 'string', demandOption: true });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const { config, alias, note, date, minutes } = argv;
+  const { config, alias, note, date, time } = argv;
 
   try {
     HarveyConfig.loadConfig(config);
@@ -36,7 +37,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
     const timeEntry: HarvestTimeEntry = {
       task_id: harvestAlias.idTask,
       project_id: harvestAlias.idProject,
-      hours: convertMinuteTimeInputToHours(minutes),
+      hours: parseUserTimeInput(time),
       notes: note,
       spent_date: convertDateInputToISODate(date),
     };

@@ -2,10 +2,10 @@ import { Alias, getAliasOrCreate } from '../alias';
 import { HarveyConfig } from '../config';
 import { HarveyError } from '../error';
 import { bookTimeEntry } from '../../service/api/harvest';
-import { convertMinuteTimeInputToHours } from '../helper';
 import { CsvFileParser } from './file-parser/csv-file-parser';
 import { XlsxFileParser } from './file-parser/xlsx-file-parser';
 import { HarvestTimeEntry } from '../harvest';
+import { parseUserTimeInput } from '../../cli/user-input';
 
 export interface FileParser {
   parserKey: string;
@@ -14,7 +14,7 @@ export interface FileParser {
 
 export interface ParserBookingEntry {
   alias: string;
-  minutes: number;
+  hours: number;
 }
 
 function getFileParsers(): FileParser[] {
@@ -83,7 +83,7 @@ function mapAliasesAndEntriesToHarvestTimeEntry(
     harvestTimeEntries.push({
       task_id: alias.idTask,
       project_id: alias.idProject,
-      hours: convertMinuteTimeInputToHours(entry.minutes),
+      hours: entry.hours,
       notes: note,
       spent_date: date,
     });

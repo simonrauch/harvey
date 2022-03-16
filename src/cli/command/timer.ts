@@ -10,6 +10,7 @@ import {
   stopRunningTimer,
   updateTimer,
 } from '../../business/timer';
+import { parseUserTimeInput } from '../user-input';
 
 type Options = {
   config: string;
@@ -17,8 +18,8 @@ type Options = {
   note?: string;
   date?: string;
   action: string;
-  add: number;
-  subtract: number;
+  add?: string;
+  subtract?: string;
   round: boolean;
   rounding_interval?: number;
 };
@@ -32,8 +33,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
       note: { type: 'string', alias: 'n' },
       date: { type: 'string', alias: 'd', describe: 'timers date, format: "YYYY-MM-DD"' },
-      add: { type: 'number', alias: 'a', default: 0 },
-      subtract: { type: 'number', alias: 's', default: 0 },
+      add: { type: 'string', alias: 'a' },
+      subtract: { type: 'string', alias: 's' },
       round: { type: 'boolean', alias: 'r', default: false },
       rounding_interval: { type: 'number', alias: 'ri' },
     })
@@ -73,8 +74,8 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
         await updateTimer(
           date ? convertDateInputToISODate(date) : null,
           note ?? null,
-          add,
-          subtract,
+          add ? parseUserTimeInput(add) : null,
+          subtract ? parseUserTimeInput(subtract) : null,
           round,
           rounding_interval ?? configuration.defaultRoundingInterval,
         );

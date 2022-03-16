@@ -199,7 +199,7 @@ describe('timer update', () => {
     const expectedUpdatedTimeEntry = { ...timeEntryRunning, hours: 0.37 };
     const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
 
-    await updateTimer(null, null, 15, null, false, 15);
+    await updateTimer(null, null, 0.25, null, false, 15);
 
     expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
     expect(readPausedTimerStub).to.have.been.calledOnce;
@@ -213,7 +213,7 @@ describe('timer update', () => {
     const expectedUpdatedTimeEntry = { ...timeEntryRunning, hours: 0.15 };
     const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
 
-    await updateTimer(null, null, null, 6, false, 15);
+    await updateTimer(null, null, null, 0.1, false, 15);
 
     expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
     expect(readPausedTimerStub).to.have.been.calledOnce;
@@ -221,7 +221,7 @@ describe('timer update', () => {
     readPausedTimerStub.restore();
   });
 
-  it('should reject', async () => {
+  it('should throw error when time is below 0 hours after subtracting time.', async () => {
     interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
     const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
     const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry');

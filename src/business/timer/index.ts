@@ -92,13 +92,13 @@ export function startTimer(alias: string, date: string, note: string): Promise<v
 export function updateTimer(
   date: string | null,
   note: string | null,
-  addMinutes: number | null,
-  subtractMinutes: number | null,
+  addHours: number | null,
+  subtractHours: number | null,
   round: boolean | null,
   roundingInterval: number,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const hourDiff = getHourTimeDiff(addMinutes ?? 0, subtractMinutes ?? 0);
+    const hourDiff = getHourTimeDiff(addHours ?? 0, subtractHours ?? 0);
 
     if (hourDiff !== 0 && round) {
       reject(new HarveyError('Rounding and adding/subtracting are exclusive timer actions. Please only use one.'));
@@ -118,9 +118,8 @@ export function updateTimer(
       });
   });
 }
-function getHourTimeDiff(addMinutes: number, subtractMinutes: number): number {
-  const minuteDiff = addMinutes - subtractMinutes;
-  return minuteDiff / 60;
+function getHourTimeDiff(addHours: number, subtractHours: number): number {
+  return addHours - subtractHours;
 }
 function setHourTimeDiffOnTimeEntry(timeEntry: HarvestTimeEntry, hourDiff: number): HarvestTimeEntry {
   const newHours = timeEntry.hours + hourDiff;
