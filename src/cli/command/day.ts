@@ -2,7 +2,7 @@ import type { Arguments, CommandBuilder } from 'yargs';
 import { HarveyConfig } from '../../business/config';
 import { modifyDay, printDay, roundDay } from '../../business/day';
 import { handleError } from '../../business/error';
-import { convertDateInputToISODate } from '../../business/helper';
+import { parseUserDateInput } from '../user-input';
 
 type Options = {
   config: string;
@@ -18,7 +18,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
   yargs
     .options({
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
-      date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
+      date: { type: 'string', alias: 'd', default: parseUserDateInput() },
       rounding_interval: { type: 'number', alias: 'ri' },
     })
     .positional('action', {
@@ -35,15 +35,15 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
     const configuration = HarveyConfig.getConfig();
     switch (action) {
       case 'status':
-        await printDay(convertDateInputToISODate(date));
+        await printDay(parseUserDateInput(date));
         break;
       case 'round':
-        await roundDay(convertDateInputToISODate(date), rounding_interval ?? configuration.defaultRoundingInterval);
-        await printDay(convertDateInputToISODate(date));
+        await roundDay(parseUserDateInput(date), rounding_interval ?? configuration.defaultRoundingInterval);
+        await printDay(parseUserDateInput(date));
         break;
       case 'modify':
-        await modifyDay(convertDateInputToISODate(date), rounding_interval ?? configuration.defaultRoundingInterval);
-        await printDay(convertDateInputToISODate(date));
+        await modifyDay(parseUserDateInput(date), rounding_interval ?? configuration.defaultRoundingInterval);
+        await printDay(parseUserDateInput(date));
         break;
     }
   } catch (error) {

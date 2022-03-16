@@ -10,7 +10,7 @@ type Options = {
   config: string;
   alias: string;
   note: string;
-  date?: string;
+  date: string;
   time: string;
 };
 
@@ -22,7 +22,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .options({
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
       note: { type: 'string', alias: 'n', default: '' },
-      date: { type: 'string', alias: 'd' },
+      date: { type: 'string', alias: 'd', default: parseUserDateInput() },
     })
     .positional('alias', { type: 'string', demandOption: true })
     .positional('time', { type: 'string', demandOption: true });

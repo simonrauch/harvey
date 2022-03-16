@@ -1,8 +1,8 @@
 import type { Arguments, CommandBuilder } from 'yargs';
 import { HarveyConfig } from '../../business/config';
 import { handleError } from '../../business/error';
-import { convertDateInputToISODate } from '../../business/helper';
 import { parseFileAndBookEntries } from '../../business/parser';
+import { parseUserDateInput } from '../user-input';
 
 type Options = {
   config: string;
@@ -19,7 +19,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     .options({
       config: { type: 'string', alias: 'c', default: '~/.config/harvey/config.json' },
       note: { type: 'string', alias: 'n', default: '' },
-      date: { type: 'string', alias: 'd', default: convertDateInputToISODate() },
+      date: { type: 'string', alias: 'd', default: parseUserDateInput() },
     })
     .positional('file', { type: 'string', demandOption: true });
 
@@ -28,7 +28,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
 
   try {
     HarveyConfig.loadConfig(config);
-    await parseFileAndBookEntries(file, convertDateInputToISODate(date), note);
+    await parseFileAndBookEntries(file, parseUserDateInput(date), note);
   } catch (error) {
     handleError(error);
     process.exit(1);
