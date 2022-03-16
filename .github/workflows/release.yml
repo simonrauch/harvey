@@ -68,5 +68,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Bump version
         run: npm version ${{ github.event.inputs.release-type }}
+      - name: Set comitter name
+        run: git config --global user.name 'Simon Rauch'
+      - name: Set comitter email
+        run: git config --global user.email 'sr@simonrauch.com'
       - name: Push versioning commit 
         run: git push --follow-tags
