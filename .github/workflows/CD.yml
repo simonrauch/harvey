@@ -108,7 +108,8 @@ jobs:
     name: "Create GitHub release"
     needs: [test, lint, build]
     runs-on: "ubuntu-latest"
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: "Create Github release"
+        uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.COMMITTER_TOKEN }}"
           prerelease: false
