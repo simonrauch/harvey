@@ -59,7 +59,7 @@ To modify time entries on Harvest, we need to specify which project and task the
 You can add a time entry by running:
 
 ```
-harvey book <alias> <minutes>
+harvey book <alias> <time>
 ```
 
 You can add notes by using the `-n` option and specify the date for the entry by using the `-d` option. The date option will default to the current date.

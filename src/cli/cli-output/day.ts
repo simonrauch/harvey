@@ -1,6 +1,6 @@
 import Table from 'cli-table';
+import { formatHours } from '.';
 import { HarvestTimeEntry } from '../../business/harvest';
-import { formatTimerHours } from '../../business/helper';
 
 export function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {
   let totalTime = 0;
@@ -11,12 +11,10 @@ export function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {
 
   timeEntries.forEach((timeEntry, index) => {
     totalTime += timeEntry.hours;
-    table.push([index, timeEntry.task?.name ?? '', timeEntry.notes ?? '', formatTimerHours(timeEntry.hours)]);
+    table.push([index, timeEntry.task?.name ?? '', timeEntry.notes ?? '', formatHours(timeEntry.hours)]);
   });
   process.stdout.write(table.toString() + '\n');
   process.stdout.write(
-    ' Sum:                                                                         ' +
-      formatTimerHours(totalTime) +
-      '\n\n',
+    ' Sum:                                                                         ' + formatHours(totalTime) + '\n\n',
   );
 }
