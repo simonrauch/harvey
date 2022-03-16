@@ -221,7 +221,7 @@ describe('timer update', () => {
     readPausedTimerStub.restore();
   });
 
-  it('should throw error when time is below 0 hours after subtracting time.', async () => {
+  it('should throw error when running timers time entry would be below 0 hours after subtracting time.', async () => {
     interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
     const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
     const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry');
@@ -230,5 +230,20 @@ describe('timer update', () => {
     );
     expect(saveTimeEntryStub).not.to.be.called;
     expect(readPausedTimerStub).to.be.calledOnce;
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+  });
+
+  it('should throw error when running timers time entry would be above 24 hours after adding time.', async () => {
+    interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry');
+    await expect(updateTimer(null, null, 1500, null, false, 15)).to.be.rejectedWith(
+      'Cannot set time entries new to time to a value above 24h.',
+    );
+    expect(saveTimeEntryStub).not.to.be.called;
+    expect(readPausedTimerStub).to.be.calledOnce;
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
   });
 });
