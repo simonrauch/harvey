@@ -104,12 +104,12 @@ jobs:
             {{formulaName}} {{version}}
         env:
           COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
-  create-gh-release:
+  github-release:
     name: "Create GitHub release"
     needs: [test, lint, build]
     runs-on: "ubuntu-latest"
       - name: "Create Github release"
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: "marvinpinto/action-automatic-releases@v1"
         with:
           repo_token: "${{ secrets.COMMITTER_TOKEN }}"
           prerelease: false
