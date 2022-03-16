@@ -9,25 +9,10 @@ import { resetHarvestCache } from '../../src/service/api/harvest';
 import * as timerFileSystem from '../../src/service/filesystem/timer';
 import * as harvestApi from '../../src/service/api/harvest';
 import { HarvestTimeEntry } from '../../src/business/harvest';
+import chaiAsPromised from 'chai-as-promised';
 
+chai.use(chaiAsPromised);
 chai.use(sinonChai);
-
-beforeEach(() => {
-  resetHarvestCache();
-  HarveyConfig.setConfig(defaultConfig);
-  nock('https://api.harvestapp.com:443', { encodedQueryParams: true }).get('/api/v2/users/me').query({}).reply(
-    200,
-    {
-      id: 666,
-      first_name: 'Simon',
-    },
-    [],
-  );
-});
-
-afterEach(() => {
-  nock.cleanAll();
-});
 
 const timeEntryNotRunning = {
   id: 666,
@@ -71,6 +56,22 @@ function interceptGetTimeEntryRequestAndRespondWith(timeEntries: HarvestTimeEntr
 }
 
 describe('timer status', () => {
+  beforeEach(() => {
+    resetHarvestCache();
+    HarveyConfig.setConfig(defaultConfig);
+    nock('https://api.harvestapp.com:443', { encodedQueryParams: true }).get('/api/v2/users/me').query({}).reply(
+      200,
+      {
+        id: 666,
+        first_name: 'Simon',
+      },
+      [],
+    );
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
   it('should print running timer', async () => {
     interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
     const printTimerStub = sinon.stub(timerCliOutput, 'printTimer').returns();
@@ -134,6 +135,22 @@ describe('timer status', () => {
 });
 
 describe('timer update', () => {
+  beforeEach(() => {
+    resetHarvestCache();
+    HarveyConfig.setConfig(defaultConfig);
+    nock('https://api.harvestapp.com:443', { encodedQueryParams: true }).get('/api/v2/users/me').query({}).reply(
+      200,
+      {
+        id: 666,
+        first_name: 'Simon',
+      },
+      [],
+    );
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
   it('should update running timers note', async () => {
     interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
     const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
@@ -202,5 +219,16 @@ describe('timer update', () => {
     expect(readPausedTimerStub).to.have.been.calledOnce;
     saveTimeEntryStub.restore();
     readPausedTimerStub.restore();
+  });
+
+  it('should reject', async () => {
+    interceptGetTimeEntryRequestAndRespondWith([timeEntryRunning]);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(null);
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry');
+    await expect(updateTimer(null, null, null, 30, false, 15)).to.be.rejectedWith(
+      'Cannot set time entries new to time to a value below 0.',
+    );
+    expect(saveTimeEntryStub).not.to.be.called;
+    expect(readPausedTimerStub).to.be.calledOnce;
   });
 });

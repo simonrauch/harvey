@@ -3,19 +3,6 @@ import sinon, { SinonFakeTimers, SinonSandbox } from 'sinon';
 import { defaultConfig, HarveyConfig } from '../../../src/business/config';
 import { parseUserDateInput, parseUserTimeInput } from '../../../src/cli/user-input';
 
-const fixedDate = new Date('2020-05-04');
-let sandbox: SinonSandbox, clock: SinonFakeTimers;
-
-beforeEach(() => {
-  HarveyConfig.setConfig(defaultConfig);
-  sandbox = sinon.createSandbox();
-  clock = sinon.useFakeTimers(fixedDate.getTime());
-});
-afterEach(() => {
-  sandbox.restore();
-  clock.restore();
-});
-
 describe('user time input parsing', () => {
   it('should interpret integer input as minutes', () => {
     expect(parseUserTimeInput('15')).to.be.equal(0.25);
@@ -89,6 +76,19 @@ describe('user time input parsing', () => {
 });
 
 describe('user date input parsing', () => {
+  const fixedDate = new Date('2020-05-04');
+  let sandbox: SinonSandbox, clock: SinonFakeTimers;
+
+  beforeEach(() => {
+    HarveyConfig.setConfig(defaultConfig);
+    sandbox = sinon.createSandbox();
+    clock = sinon.useFakeTimers(fixedDate.getTime());
+  });
+  afterEach(() => {
+    sandbox.restore();
+    clock.restore();
+  });
+
   it('should interpret empty string as current date', () => {
     expect(parseUserDateInput('')).to.be.equal('2020-05-04');
   });

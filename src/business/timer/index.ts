@@ -97,20 +97,25 @@ export function updateTimer(
   round: boolean | null,
   roundingInterval: number,
 ): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const hourDiff = getHourTimeDiff(addMinutes ?? 0, subtractMinutes ?? 0);
 
     if (hourDiff !== 0 && round) {
-      throw new HarveyError('Rounding and adding/subtracting are exclusive timer actions. Please only use one.');
+      reject(new HarveyError('Rounding and adding/subtracting are exclusive timer actions. Please only use one.'));
+      return;
     }
 
     const promises = [
       updateRunningTimer(date, note, hourDiff, round ?? false, roundingInterval),
       updatePausedTimer(date, note, hourDiff, round ?? false, roundingInterval),
     ];
-    Promise.all(promises).then(() => {
-      resolve();
-    });
+    Promise.all(promises)
+      .then(() => {
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 }
 function getHourTimeDiff(addMinutes: number, subtractMinutes: number): number {
@@ -136,12 +141,17 @@ async function updateRunningTimer(
   round: boolean,
   roundingInterval: number,
 ): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     getRunningTimeEntry().then((activeTimer) => {
       if (activeTimer) {
         if (date) activeTimer.spent_date = date;
         if (note) activeTimer.notes = note;
-        activeTimer = setHourTimeDiffOnTimeEntry(activeTimer, hourDiff);
+        try {
+          activeTimer = setHourTimeDiffOnTimeEntry(activeTimer, hourDiff);
+        } catch (error) {
+          reject(error);
+          return;
+        }
         if (round) {
           activeTimer = roundTimeEntry(activeTimer, roundingInterval);
         }
@@ -159,14 +169,19 @@ async function updatePausedTimer(
   round: boolean,
   roundingInterval: number,
 ): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let pausedTimer = readPausedTimer();
     if (pausedTimer) {
       if (date) pausedTimer.spent_date = date;
       if (note) pausedTimer.notes = note;
-      pausedTimer = setHourTimeDiffOnTimeEntry(pausedTimer, hourDiff);
       if (round) {
         pausedTimer = roundTimeEntry(pausedTimer, roundingInterval);
+      }
+      try {
+        pausedTimer = setHourTimeDiffOnTimeEntry(pausedTimer, hourDiff);
+      } catch (error) {
+        reject(error);
+        return;
       }
       saveTimeEntry(pausedTimer).then((updatedTimer) => {
         storePausedTimer(updatedTimer);
