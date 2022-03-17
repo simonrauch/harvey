@@ -22,6 +22,10 @@
 ## timer
 
 - restart from stopped entry
+- update current timers note with git commit message of passed reference
+  - use output of `git show --pretty=format:%s -s <ref>` example:
+    - `git show --pretty=format:%s -s HEAD`
+    - `git show --pretty=format:%s -s HEAD^`
 
 ## auth check on startup
 
