@@ -1,5 +1,7 @@
 [![npm](https://badgen.net/npm/v/@simonrauch/harvey/latest)](https://www.npmjs.com/package/@simonrauch/harvey) 
 [![npm](https://badgen.net/npm/dt/@simonrauch/harvey)](https://www.npmjs.com/package/@simonrauch/harvey)
+![CI](https://github.com/simonrauch/harvey/actions/workflows/CI.yml/badge.svg?branch=master)
+![CD](https://github.com/simonrauch/harvey/actions/workflows/CD.yml/badge.svg?branch=master)
 
 # Harvey
 
