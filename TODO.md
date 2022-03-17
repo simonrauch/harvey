@@ -8,10 +8,6 @@
 - cli (check if process.stdout can even be stubbed/mocked --> check [this](https://github.com/yargs/yargs/blob/main/docs/advanced.md#testing-a-command-module) for yargs command testing)
 - implement unimplemented test stubs
 
-## day command
-
-- check timezone
-
 ## cli
 
 - scale tables according to terminal width
