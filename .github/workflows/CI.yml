@@ -64,6 +64,6 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: Mocha tests
+          name: Test results
           path: mocha-test-results.json
           reporter: mocha-json
