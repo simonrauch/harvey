@@ -1,4 +1,4 @@
-import { fileExists, readFromJsonFile, transformPath, writeToJsonFile } from '.';
+import { fileExists, readFromJsonFile, writeToJsonFile } from '.';
 import { Alias } from '../../business/alias';
 import { HarveyConfig } from '../../business/config';
 
@@ -11,6 +11,6 @@ export function readAliasFile(): Map<string, Alias> {
 }
 
 export function writeAliasFile(aliases: Map<string, Alias>): void {
-  const filePath = transformPath(HarveyConfig.getConfig().aliasFilePath);
+  const filePath = HarveyConfig.getConfig().aliasFilePath;
   writeToJsonFile(Array.from(aliases.entries()), filePath);
 }
