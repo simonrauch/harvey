@@ -30,7 +30,14 @@ jobs:
       - name: Run Prettier
         run: npm run prettier
       - name: Run EsLint
-        run: npm run eslint
+        if: always()
+        run: npm run eslint:ci
+      - name: Annotate EsLint results
+        uses: ataylorme/eslint-annotate-action@1.0.4
+        if: always()
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          report-json: 'eslint-report.json'
   build:
     name: Build
     needs: setup
@@ -62,7 +69,7 @@ jobs:
         run: npm run test:ci
       - name: Report test results
         uses: dorny/test-reporter@v1
-        if: success() || failure()
+        if: always()
         with:
           name: Test results
           path: mocha-test-results.json

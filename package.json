@@ -19,6 +19,7 @@
     "prettier": "prettier --check './**/*.ts'",
     "prettier:fix": "prettier --write './**/*.ts'",
     "eslint": "eslint . --ext .ts",
+    "eslint:ci": "eslint --output-file eslint-report.json --format json . --ext .ts",
     "eslint:fix": "eslint . --ext .ts --fix",
     "build": "rm -rf build && npx tsc && chmod +x build/cli/index.js",
     "dev": "npm run build && npx tsc --watch",

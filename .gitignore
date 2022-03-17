@@ -2,3 +2,5 @@
 node_modules
 build
 pkg
+mocha-test-results.json
+eslint-report.json
