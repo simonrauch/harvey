@@ -54,7 +54,7 @@ export async function getAliasOrCreate(aliasKey: string): Promise<Alias> {
   });
 }
 
-export function getAlias(aliasKey: string): Alias {
+function getAlias(aliasKey: string): Alias {
   const alias = readAliasFile().get(aliasKey);
 
   if (!alias) {
