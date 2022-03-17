@@ -14,7 +14,7 @@ export interface Config {
 }
 
 export class HarveyConfig {
-  private static config: Config;
+  private static config?: Config;
   private constructor() {
     throw new Error("Don't use the constructor of this class. Only use it's static methods.");
   }
@@ -30,6 +30,9 @@ export class HarveyConfig {
   }
   public static setConfig(config: Config): void {
     this.config = config;
+  }
+  public static resetConfig(): void {
+    this.config = undefined;
   }
 }
 
