@@ -52,7 +52,7 @@ describe('timer status', () => {
     getRunningTimeEntryStub.restore();
   });
 
-  it('should print running timer again, when additional paused timer file is present', async () => {
+  it('should print running timer, even if additional paused timer file is present', async () => {
     const getRunningTimeEntryStub = sinon.stub(harvestApi, 'getRunningTimeEntry').resolves({ ...timeEntryRunning });
     const printTimerStub = sinon.stub(timerCliOutput, 'printTimer').returns();
     const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(timeEntryNotRunning);
@@ -285,4 +285,13 @@ describe('timer update', () => {
     storePausedTimerStub.restore();
     getRunningTimeEntryStub.restore();
   });
+
+  it('should update paused timers date');
+  it('should round paused timer');
+  it('should add time to paused timer');
+  it('should subtract time from paused timer');
+  it('should add and subtract time from a paused timer');
+  it('should throw error when paused timers time entry would be below 0 hours after subtracting time.');
+  it('should throw error when paused timers time entry would be above 24 hours after adding time.');
+  it('should throw error when paused timers time is modified and rounded at the same time');
 });

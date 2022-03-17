@@ -275,4 +275,8 @@ describe('harvest api service', () => {
     expect(projectTaskAssignments2).to.be.eql(projectTaskAssignments);
     expect(getMyProjectAssignmentsNock2.isDone()).to.be.true;
   });
+  it('should request current user id');
+  it('should cache current user id');
+  it('should reset current user id cache');
+  it('should ignore current user id cache');
 });
