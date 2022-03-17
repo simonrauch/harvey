@@ -1,19 +1,29 @@
+## docs
+
+- date input format
+- time input format
+
+## missing tests
+
+- service/filesystem --> incomplete
+- service/api/harvest --> incomplete
+- cli --> incomplete (check if process.stdout can even be stubbed/mocked)
+- business/timer --> incomplete
+- business/round
+- business/parser
+- business/harvest
+- business/error
+- business/day
+- business/config
+- business/alias
+
 ## day command
 
 - check timezone
 
-## timer command
+## timer
 
-- add rounding option to stop action
-- add options to add or subtract time from current timer
-
-## date inputs
-
-- check if date inputs are valid
-
-## enter time in different format
-
-- check if `:` is present in entered string and parse accordingly
+- restart from stopped entry
 
 ## auth check on startup
 
@@ -23,10 +33,6 @@
 ## refactoring
 
 - refactor error handling
-
-## codebase
-
-- tests
 
 ## add oauth authentication
 
