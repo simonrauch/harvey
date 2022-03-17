@@ -9,7 +9,6 @@
 - service/api/harvest --> incomplete
 - cli --> incomplete (check if process.stdout can even be stubbed/mocked)
 - business/timer --> incomplete
-- business/round
 - business/parser
 - business/harvest
 - business/error
