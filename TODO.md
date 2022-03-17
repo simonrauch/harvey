@@ -18,6 +18,10 @@
 
 - check timezone
 
+## cli
+
+- scale tables according to terminal width
+
 ## timer
 
 - restart from stopped entry
