@@ -295,3 +295,15 @@ describe('timer update', () => {
   it('should throw error when paused timers time entry would be above 24 hours after adding time.');
   it('should throw error when paused timers time is modified and rounded at the same time');
 });
+
+describe('timer lifecycle', () => {
+  it('should start new timer');
+  it('throw error if timer is started when there already is a running timer');
+  it('should pause running timer');
+  it('throw error if timer is paused when there already is a paused timer');
+  it('should resume paused timer');
+  it('throw error if timer is resumed when there already is a running timer');
+  it('should stop running timer');
+  it('should stop paused timer');
+  it('throw error if timer is stopped when there is no running timer');
+});
