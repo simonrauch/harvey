@@ -47,9 +47,6 @@ export async function getMyProjectAssignments(forceFetch = false): Promise<Harve
   });
 }
 
-
-
-
 export async function getMyProjectTaskAssignments(forceFetch = false): Promise<Array<HarvestProjectTaskAssignment>> {
   return new Promise((resolve) => {
     if (projectTaskAssignmentCache && !forceFetch) {
@@ -85,9 +82,7 @@ export async function getRunningTimeEntry(): Promise<HarvestTimeEntry | null> {
           return;
         }
         if (timeEntries[0]) {
-          resolve(timeEntries[0])
-
-
+          resolve(timeEntries[0]);
         }
         resolve(null);
       });
@@ -148,7 +143,7 @@ export async function getMyTimeEntriesPerDate(date: string): Promise<HarvestTime
 export async function deleteTimeEntry(timeEntry: HarvestTimeEntry): Promise<void> {
   return new Promise((resolve) => {
     const harvest = getHarvestSdk();
-    if (!timeEntry.id ) {
+    if (!timeEntry.id) {
       throw new Error('id property has to be set, to delete a time entry.');
     }
     harvest.time_entries.delete(timeEntry.id).then(resolve);
