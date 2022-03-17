@@ -279,4 +279,12 @@ describe('harvest api service', () => {
   it('should cache current user id');
   it('should reset current user id cache');
   it('should ignore current user id cache');
+  it('should post newly created time entry');
+  it('should post update to existing time entry');
+  it('should throw error if id of non existing time entry is given for update request');
+  it('should post update to restart existing time entry');
+  it('should post updatee to stop running time entry');
+  it('should request current users time entries per per day');
+  it('should verify current user is authenticated');
+  it('should verify current user is not authenticated');
 });
