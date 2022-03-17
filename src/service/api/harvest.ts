@@ -157,11 +157,14 @@ export async function isAccountIdAndTokenValid(accountId: string, token: string)
       .then((user: HarvestUser) => {
         if (user.first_name) {
           resolve(true);
+          return;
         }
         resolve(false);
+        return;
       })
       .catch(() => {
         resolve(false);
+        return;
       });
   });
 }
