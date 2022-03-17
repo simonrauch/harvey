@@ -65,6 +65,5 @@ jobs:
         if: success() || failure()
         with:
           name: Mocha tests
-          artifact: mocha-test-results
           path: mocha-test-results.json
           reporter: mocha-json
