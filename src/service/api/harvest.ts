@@ -14,7 +14,7 @@ let authenticatedUserIdCache: number | null;
 let harvestSdk: Harvest | null;
 
 export function resetHarvestCache(): void {
-  projectAssignmentCache = null;
+  projectTaskAssignmentCache = null;
   projectAssignmentCache = null;
   authenticatedUserIdCache = null;
   harvestSdk = null;
@@ -69,14 +69,17 @@ export async function getMyProjectTaskAssignments(forceFetch = false): Promise<A
 }
 
 export async function getRunningTimeEntry(): Promise<HarvestTimeEntry | null> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const harvest = getHarvestSdk();
     getAuthenticatedUserId().then((userId) => {
       harvest.time_entries.get({ is_running: true, user_id: userId }).then((timeEntries: HarvestTimeEntry[]) => {
         if (timeEntries.length > 1) {
-          throw new HarveyError(
-            'You somehow managed to start multiple time entries. Only one time entry should be running. Please stop them and restart only the correct one.',
+          reject(
+            new HarveyError(
+              'You somehow managed to start multiple time entries. Only one time entry should be running. Please stop them and restart only the correct one.',
+            ),
           );
+          return;
         }
         if (timeEntries[0]) {
           resolve(timeEntries[0]);
@@ -149,11 +152,16 @@ export async function deleteTimeEntry(timeEntry: HarvestTimeEntry): Promise<void
 export async function isAccountIdAndTokenValid(accountId: string, token: string): Promise<boolean> {
   return new Promise((resolve) => {
     const harvest = new Harvest(accountId, token, 'harvey');
-    harvest.users.me().then((user: HarvestUser) => {
-      if (user.first_name) {
-        resolve(true);
-      }
-      resolve(false);
-    });
+    harvest.users
+      .me()
+      .then((user: HarvestUser) => {
+        if (user.first_name) {
+          resolve(true);
+        }
+        resolve(false);
+      })
+      .catch(() => {
+        resolve(false);
+      });
   });
 }
