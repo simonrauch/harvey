@@ -48,7 +48,7 @@ export async function getMyProjectAssignments(forceFetch = false): Promise<Harve
 }
 
 export async function getMyProjectTaskAssignments(forceFetch = false): Promise<Array<HarvestProjectTaskAssignment>> {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     if (projectTaskAssignmentCache && !forceFetch) {
       resolve(projectTaskAssignmentCache);
     }
@@ -82,7 +82,9 @@ export async function getRunningTimeEntry(): Promise<HarvestTimeEntry | null> {
           return;
         }
         if (timeEntries[0]) {
-          resolve(timeEntries[0]);
+          resolve(timeEntries[0])
+
+
         }
         resolve(null);
       });
@@ -154,7 +156,7 @@ export async function isAccountIdAndTokenValid(accountId: string, token: string)
     const harvest = new Harvest(accountId, token, 'harvey');
     harvest.users
       .me()
-      .then((user: HarvestUser) => {
+      .then((user: any) => {
         if (user.first_name) {
           resolve(true);
         }
