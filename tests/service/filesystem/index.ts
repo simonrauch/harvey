@@ -3,7 +3,13 @@ import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
 import os from 'os';
 import fs from 'fs';
-import { fileExists, readFromJsonFile, transformPath, writeToJsonFile } from '../../../src/service/filesystem';
+import {
+  deleteFile,
+  fileExists,
+  readFromJsonFile,
+  transformPath,
+  writeToJsonFile,
+} from '../../../src/service/filesystem';
 
 chai.use(sinonChai);
 
@@ -127,10 +133,58 @@ describe('filesystem service', () => {
 
     existsSyncStub.restore();
     homedirStub.restore();
-    writeFileSyncStub.restore;
+    writeFileSyncStub.restore();
     mkdirSyncStub.restore();
   });
-  it('should write pretty json to file');
-  it('should delete file');
-  it("should not delete file if it doesn't exist");
+
+  it('should write pretty json to file', () => {
+    const json = {
+      yo: 'ho',
+      ho: { no: 'lo' },
+    };
+    const prettyJsonString = JSON.stringify(json, null, 2);
+    const existsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
+    const homedirStub = sinon.stub(os, 'homedir').returns('/home/wawiwahu');
+    const writeFileSyncStub = sinon.stub(fs, 'writeFileSync');
+
+    writeToJsonFile(json, '/file.json', true);
+
+    expect(homedirStub).to.have.been.called;
+    expect(existsSyncStub).to.have.been.called;
+    expect(writeFileSyncStub).to.have.been.calledWith('/file.json', prettyJsonString, 'utf8');
+
+    existsSyncStub.restore();
+    homedirStub.restore();
+    writeFileSyncStub.restore();
+  });
+  it('should delete file', () => {
+    const existsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
+    const homedirStub = sinon.stub(os, 'homedir').returns('/home/wawiwahu');
+    const unlinkSyncStub = sinon.stub(fs, 'unlinkSync');
+
+    deleteFile('/file.json');
+
+    expect(homedirStub).to.have.been.called;
+    expect(existsSyncStub).to.have.been.called;
+    expect(unlinkSyncStub).to.have.been.calledWith('/file.json');
+
+    existsSyncStub.restore();
+    homedirStub.restore();
+    unlinkSyncStub.restore();
+  });
+  it("should not delete file if it doesn't exist", () => {
+    const existsSyncStub = sinon.stub(fs, 'existsSync').returns(false);
+    const homedirStub = sinon.stub(os, 'homedir').returns('/home/wawiwahu');
+    const unlinkSyncStub = sinon.stub(fs, 'unlinkSync');
+
+    deleteFile('/file.json');
+
+    expect(homedirStub).to.have.been.called;
+    expect(existsSyncStub).to.have.been.called;
+    expect(unlinkSyncStub).to.not.have.been.called;
+
+    existsSyncStub.restore();
+    homedirStub.restore();
+    unlinkSyncStub.restore();
+  });
 });
