@@ -23,6 +23,7 @@
     "build": "rm -rf build && npx tsc && chmod +x build/cli/index.js",
     "dev": "npm run build && npx tsc --watch",
     "test": "mocha -r ts-node/register 'tests/**/*.ts'",
+    "test:ci": "mocha -r ts-node/register 'tests/**/*.ts' --reporter json > mocha-test-results.json",
     "prepare": "husky install; npm run build",
     "preversion": "[[ -z $(git status --porcelain) ]] && git pull && npm run build && npm run prettier && npm run eslint && npm test",
     "postversion": "git push --follow-tags"

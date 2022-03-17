@@ -59,4 +59,12 @@ jobs:
         uses: ./.github/actions/cache-restore
         id: cache-node-modules
       - name: Run tests
-        run: npm test
+        run: npm run test:ci
+      - name: Report test results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Mocha tests
+          artifact: mocha-test-results
+          path: mocha-test-results.json
+          reporter: mocha-json
