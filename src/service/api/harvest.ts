@@ -29,15 +29,6 @@ export function getHarvestSdk(): Harvest {
   return harvestSdk;
 }
 
-export async function bookTimeEntry(timeEntry: HarvestTimeEntry): Promise<void> {
-  return new Promise((resolve) => {
-    const harvest = getHarvestSdk();
-    harvest.time_entries.create(timeEntry).then(() => {
-      resolve();
-    });
-  });
-}
-
 export async function getMyProjectAssignments(forceFetch = false): Promise<HarvestProjectAssignment[]> {
   return new Promise((resolve) => {
     if (projectAssignmentCache && !forceFetch) {

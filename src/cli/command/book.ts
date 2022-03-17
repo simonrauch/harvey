@@ -2,7 +2,7 @@ import type { Arguments, CommandBuilder } from 'yargs';
 import { getAliasOrCreate } from '../../business/alias';
 import { HarveyConfig } from '../../business/config';
 import { handleError } from '../../business/error';
-import { bookTimeEntry } from '../../service/api/harvest';
+import { saveTimeEntry } from '../../service/api/harvest';
 import { HarvestTimeEntry } from '../../business/harvest';
 import { parseUserDateInput, parseUserTimeInput } from '../user-input';
 
@@ -40,7 +40,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
       notes: note,
       spent_date: parseUserDateInput(date),
     };
-    await bookTimeEntry(timeEntry);
+    await saveTimeEntry(timeEntry);
   } catch (error) {
     handleError(error);
     process.exit(1);

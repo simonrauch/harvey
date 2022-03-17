@@ -1,7 +1,7 @@
 import { Alias, getAliasOrCreate } from '../alias';
 import { HarveyConfig } from '../config';
 import { HarveyError } from '../error';
-import { bookTimeEntry } from '../../service/api/harvest';
+import { saveTimeEntry } from '../../service/api/harvest';
 import { CsvFileParser } from './file-parser/csv-file-parser';
 import { XlsxFileParser } from './file-parser/xlsx-file-parser';
 import { HarvestTimeEntry } from '../harvest';
@@ -47,7 +47,7 @@ async function bookEntries(entries: ParserBookingEntry[], date: string, note: st
       const timeEntries = mapAliasesAndEntriesToHarvestTimeEntry(aliases, entries, date, note);
       const timeEntryCreationPromises = [];
       for (const timeEntry of timeEntries) {
-        timeEntryCreationPromises.push(bookTimeEntry(timeEntry));
+        timeEntryCreationPromises.push(saveTimeEntry(timeEntry));
       }
       Promise.all(timeEntryCreationPromises).then(() => {
         resolve();
