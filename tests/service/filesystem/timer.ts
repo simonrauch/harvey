@@ -3,7 +3,6 @@ import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
 import { defaultConfig, HarveyConfig } from '../../../src/business/config';
-import { Alias } from '../../../src/business/alias';
 import { deletePausedTimer, readPausedTimer, storePausedTimer } from '../../../src/service/filesystem/timer';
 
 chai.use(sinonChai);
