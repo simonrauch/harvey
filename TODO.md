@@ -11,7 +11,6 @@
 - business/timer --> incomplete
 - business/parser
 - business/harvest
-- business/error
 - business/day
 - business/config
 - business/alias
