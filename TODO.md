@@ -5,14 +5,8 @@
 
 ## missing tests
 
-- service/api/harvest --> incomplete
-- cli --> incomplete (check if process.stdout can even be stubbed/mocked --> check [this](https://github.com/yargs/yargs/blob/main/docs/advanced.md#testing-a-command-module) for yargs command testing)
-- business/timer --> incomplete
-- business/parser
-- business/harvest
-- business/day
-- business/config
-- business/alias
+- cli (check if process.stdout can even be stubbed/mocked --> check [this](https://github.com/yargs/yargs/blob/main/docs/advanced.md#testing-a-command-module) for yargs command testing)
+- implement unimplemented test stubs
 
 ## day command
 
@@ -34,10 +28,6 @@
 
 - check auth after loading config
 - store authenticated user id after check
-
-## refactoring
-
-- refactor error handling
 
 ## add oauth authentication
 
