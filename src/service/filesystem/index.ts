@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { homedir } from 'os';
+import { HarveyError } from '../../business/error';
 
 export function transformPath(filePath: string): string {
   return filePath.replace('~', homedir());
@@ -18,7 +19,12 @@ export function readFromJsonFile(filePath: string): any {
   }
 
   filePath = transformPath(filePath);
-  return JSON.parse(fs.readFileSync(filePath).toString());
+  const fileContent = fs.readFileSync(filePath).toString();
+  try {
+    return JSON.parse(fileContent);
+  } catch (error) {
+    throw new HarveyError(`JSON file "${filePath}" is not in a valid JSON format.`);
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

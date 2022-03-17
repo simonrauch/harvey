@@ -3,7 +3,7 @@ import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
 import os from 'os';
 import fs from 'fs';
-import { fileExists, readFromJsonFile, transformPath } from '../../../src/service/filesystem';
+import { fileExists, readFromJsonFile, transformPath, writeToJsonFile } from '../../../src/service/filesystem';
 
 chai.use(sinonChai);
 
@@ -71,7 +71,21 @@ describe('filesystem service', () => {
     homedirStub.restore();
   });
 
-  it('should throw error if json to be read is malformed');
+  it('should throw error if json to be read is malformed', () => {
+    const existsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
+    const readFileSyncStub = sinon.stub(fs, 'readFileSync').returns('abbalababba');
+    const homedirStub = sinon.stub(os, 'homedir').returns('/home/wawiwahu');
+
+    expect(() => readFromJsonFile('/file-malformed.json')).to.throw(
+      'JSON file "/file-malformed.json" is not in a valid JSON format.',
+    );
+    expect(readFileSyncStub).to.have.been.calledWith('/file-malformed.json');
+    expect(homedirStub).to.have.been.called;
+
+    existsSyncStub.restore();
+    homedirStub.restore();
+    readFileSyncStub.restore();
+  });
 
   it('should write json to file', () => {
     const json = {
@@ -80,20 +94,42 @@ describe('filesystem service', () => {
     };
     const jsonString = JSON.stringify(json);
     const existsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
-    const readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(jsonString);
     const homedirStub = sinon.stub(os, 'homedir').returns('/home/wawiwahu');
+    const writeFileSyncStub = sinon.stub(fs, 'writeFileSync');
 
-    expect(readFromJsonFile('/file.json')).to.be.eql(json);
-    expect(readFileSyncStub).to.have.been.calledWith('/file.json');
+    writeToJsonFile(json, '/file.json');
+
     expect(homedirStub).to.have.been.called;
+    expect(existsSyncStub).to.have.been.called;
+    expect(writeFileSyncStub).to.have.been.calledWith('/file.json', jsonString);
 
     existsSyncStub.restore();
     homedirStub.restore();
-    readFileSyncStub.restore();
+    writeFileSyncStub.restore();
   });
 
-  it('should write json to file');
-  it('should write json to file and create directory');
+  it('should write json to file and create directory', () => {
+    const json = {
+      yo: 'ho',
+      ho: { no: 'lo' },
+    };
+    const jsonString = JSON.stringify(json);
+    const existsSyncStub = sinon.stub(fs, 'existsSync').returns(false);
+    const mkdirSyncStub = sinon.stub(fs, 'mkdirSync');
+    const homedirStub = sinon.stub(os, 'homedir').returns('/home/wawiwahu');
+    const writeFileSyncStub = sinon.stub(fs, 'writeFileSync');
+
+    writeToJsonFile(json, '~/.secret-dir/file.json');
+
+    expect(writeFileSyncStub).to.have.been.calledWith('/home/wawiwahu/.secret-dir/file.json', jsonString, 'utf8');
+    expect(homedirStub).to.have.been.called;
+    expect(mkdirSyncStub).to.have.been.calledWith('/home/wawiwahu/.secret-dir', { recursive: true });
+
+    existsSyncStub.restore();
+    homedirStub.restore();
+    writeFileSyncStub.restore;
+    mkdirSyncStub.restore();
+  });
   it('should write pretty json to file');
   it('should delete file');
   it("should not delete file if it doesn't exist");
