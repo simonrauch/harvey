@@ -1,4 +1,4 @@
-import { handleError, HarveyError, HarveyFileNotFoundError } from '../../src/business/error';
+import { handleError, HarveyError } from '../../src/business/error';
 import * as cliOutput from '../../src/cli/cli-output';
 import { expect } from 'chai';
 import sinon from 'sinon';
