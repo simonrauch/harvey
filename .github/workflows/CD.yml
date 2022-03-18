@@ -85,8 +85,8 @@ jobs:
       - name: Extract Version
         id: extract-version
         run: echo "::set-output name=version::$(npm view . version)"
-  homebrew-publish:
-    name: Publish to Homebrew
+  homebrew-bump:
+    name: Bump Homebrew formula
     needs: [release]
     runs-on: ubuntu-latest
     steps:
