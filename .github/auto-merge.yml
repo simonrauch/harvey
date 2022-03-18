@@ -2,5 +2,5 @@ minApprovals:
   NONE: 0
 requiredLabels:
   - dependencies
-updateBranch: true
+updateBranch: false
 mergeMethod: squash
