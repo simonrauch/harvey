@@ -1,9 +1,9 @@
 import Table from 'cli-table';
-import { formatHours, getMaxTableWidth } from '.';
+import { formatHours, getTableWidth } from '.';
 import { HarvestTimeEntry } from '../../business/harvest';
 
 export function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {
-  const totalWidth = getMaxTableWidth();
+  const totalWidth = getTableWidth();
   let totalTime = 0;
   const table = new Table({
     head: ['ID', 'Task', 'Notes', 'Time'],
