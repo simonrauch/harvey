@@ -33,7 +33,7 @@ jobs:
         if: always()
         run: npm run eslint:ci
       - name: Annotate EsLint results
-        uses: ataylorme/eslint-annotate-action@1.0.4
+        uses: ataylorme/eslint-annotate-action@1.2.0
         if: always()
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
