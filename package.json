@@ -2,12 +2,6 @@
   "name": "@simonrauch/harvey",
   "version": "2.3.32",
   "description": "A simple CLI for Harvest.",
-  "bin": {
-    "harvey": "./build/cli/index.js"
-  },
-  "files": [
-    "build/**/*"
-  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/simonrauch/harvey.git"
@@ -15,6 +9,18 @@
   "bugs": {
     "url": "https://github.com/simonrauch/harvey/issues"
   },
+  "keywords": [
+    "harvest",
+    "cli"
+  ],
+  "author": "Simon Rauch <sr@simonrauch.com>",
+  "license": "MIT",
+  "bin": {
+    "harvey": "./build/cli/index.js"
+  },
+  "files": [
+    "build/**/*"
+  ],
   "scripts": {
     "prettier": "prettier --check './**/*.ts'",
     "prettier:fix": "prettier --write './**/*.ts'",
@@ -26,15 +32,8 @@
     "test": "mocha -r ts-node/register 'tests/**/*.ts'",
     "test:ci": "mocha -r ts-node/register 'tests/**/*.ts' --reporter json > mocha-test-results.json",
     "prepare": "husky install; npm run build",
-    "preversion": "[[ -z $(git status --porcelain) ]] && git pull && npm run build && npm run prettier && npm run eslint && npm test",
-    "postversion": "git push --follow-tags"
+    "package": "ncc build --source-map"
   },
-  "keywords": [
-    "harvest",
-    "cli"
-  ],
-  "author": "Simon Rauch <sr@simonrauch.com>",
-  "license": "MIT",
   "dependencies": {
     "cli-table": "^0.3.11",
     "exceljs": "^4.3.0",
@@ -42,6 +41,8 @@
     "yargs": "^17.3.1"
   },
   "devDependencies": {
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.5",
     "@types/cli-table": "^0.3.0",
@@ -62,9 +63,33 @@
     "mocha": "^9.2.2",
     "nock": "^13.2.4",
     "prettier": "2.6.0",
+    "semantic-release": "^19.0.2",
     "sinon": "^13.0.1",
     "sinon-chai": "^3.7.0",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.2"
+  },
+  "release": {
+    "branches": "master",
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/github",
+      ["@semantic-release/exec", {
+        "prepare": "npm run package"
+      }],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "build",
+            "package.json",
+            "package-lock.json"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
+    ]
   }
 }

@@ -1,8 +1,8 @@
 name: CD
 on:
   push:
-    tags: 
-      - 'v*'
+    branches: 
+      - 'master'
 jobs:
   setup:
     name: Setup
@@ -58,23 +58,25 @@ jobs:
         id: cache-node-modules
       - name: Run tests
         run: npm test
-  extract-version:
-    name: Extract version 
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.extract-version.outputs.version }}
-      version-without-v: ${{ steps.extract-version.outputs.version-without-v }}
-    steps:
-      - name: Extract version
-        id: extract-version
-        uses: battila7/get-version-action@v2
-  npm-publish:
-    name: Publish to NPM
+#  extract-version:
+#    name: Extract version 
+#    runs-on: ubuntu-latest
+#    outputs:
+#      version: ${{ steps.extract-version.outputs.version }}
+#      version-without-v: ${{ steps.extract-version.outputs.version-without-v }}
+#    steps:
+#      - name: Extract version
+#        id: extract-version
+#        uses: battila7/get-version-action@v2
+  release:
+    name: Release
     needs: [test, lint, build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          persist-credentials: false
       - name: Restore Cache
         uses: ./.github/actions/cache-restore
         id: cache-node-modules
@@ -83,34 +85,35 @@ jobs:
         with:
           name: build
           path: build
-      - name: Publish 
-        run: npm publish
+      - name: Run semantic-release 
+        run: npx semantic-release
         env:
+          GITHUB_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  homebrew-publish:
-    name: Publish to Homebrew
-    needs: [extract-version, npm-publish]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Bump Homebrew formula
-        uses: mislav/bump-homebrew-formula-action@v1
-        with:
-          formula-name: harvey
-          formula-path: Formula/harvey.rb
-          homebrew-tap: simonrauch/homebrew-tap
-          base-branch: main
-          download-url: https://registry.npmjs.org/@simonrauch/harvey/-/harvey-${{ needs.extract-version.outputs.version-without-v }}.tgz
-          commit-message: |
-            {{formulaName}} {{version}}
-        env:
-          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
-  github-release:
-    name: "Create GitHub release"
-    needs: [test, lint, build]
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: "Create Github release"
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
+#  homebrew-publish:
+#    name: Publish to Homebrew
+#    needs: [extract-version, release]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Bump Homebrew formula
+#        uses: mislav/bump-homebrew-formula-action@v1
+#        with:
+#          formula-name: harvey
+#          formula-path: Formula/harvey.rb
+#          homebrew-tap: simonrauch/homebrew-tap
+#          base-branch: main
+#          download-url: https://registry.npmjs.org/@simonrauch/harvey/-/harvey-${{ needs.extract-version.outputs.version-without-v }}.tgz
+#          commit-message: |
+#            {{formulaName}} {{version}}
+#        env:
+#          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+#  github-release:
+#    name: "Create GitHub release"
+#    needs: [test, lint, build]
+#    runs-on: "ubuntu-latest"
+#    steps:
+#      - name: "Create Github release"
+#        uses: "marvinpinto/action-automatic-releases@latest"
+#        with:
+#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#          prerelease: false
