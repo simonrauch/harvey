@@ -48,6 +48,19 @@ or
 harvey timer --help
 ```
 
+### Time input formats
+
+Harvey will interpret time inputs according to following criteria:
+
+- integer input will be interpreted as minutes: `15` will be interpreted as 15 minutes.
+- decimal inputs will be intepreted as hours: `0.25`, `0,25`, `.25` and `,25` will be interpreted as 15 minutes.
+- integers separated by `:` will be intepreted as hours and minutes: `0:15` and `:15` will be interpreted as 15 minutes.
+
+### Date input formats
+
+Harvey uses the following date format `YYYY-MM-DD` (Example: `2022-03-20`).
+Not passing any date will default to the current date.
+
 ### Aliases
 
 To modify time entries on Harvest, we need to specify which project and task they are reffering to. To make this easier Harvey creates aliases and saves them to a file (default: `~/.config/harvey/aliases.json`). The alias is typically a unique substring of the tasks name, like a Jira issue reference. For the most part Harvey will manage those aliases automatically, but you can modify them, by using the following commands:
