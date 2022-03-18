@@ -1,5 +1,5 @@
 import Table from 'cli-table';
-import { formatHours } from '.';
+import { formatHours, getTableWidth } from '.';
 import { HarveyTimer, HarveyTimerStatus } from '../../business/timer';
 
 export function printTimer(timer: HarveyTimer): void {
@@ -7,10 +7,11 @@ export function printTimer(timer: HarveyTimer): void {
   let tableHead: string[] = ['Status'];
   let colWidth: number[] = [9];
   let tableRow: string[] = [getStatusString(timer.status)];
+  const totalWidth = getTableWidth();
 
   if (timeEntry && timeEntry.task) {
     tableHead = tableHead.concat(['Task', 'Notes', 'Timer']);
-    colWidth = colWidth.concat([44, 20, 7]);
+    colWidth = colWidth.concat([Math.floor((totalWidth - 17) * 0.65), Math.floor((totalWidth - 17) * 0.35), 7]);
     tableRow = tableRow.concat([timeEntry.task.name, (timeEntry.notes ??= ''), formatHours(timeEntry.hours)]);
   }
 
