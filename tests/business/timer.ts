@@ -286,24 +286,167 @@ describe('timer update', () => {
     getRunningTimeEntryStub.restore();
   });
 
-  it('should update paused timers date');
-  it('should round paused timer');
-  it('should add time to paused timer');
-  it('should subtract time from paused timer');
-  it('should add and subtract time from a paused timer');
-  it('should throw error when paused timers time entry would be below 0 hours after subtracting time.');
-  it('should throw error when paused timers time entry would be above 24 hours after adding time.');
-  it('should throw error when paused timers time is modified and rounded at the same time');
+  it('should update paused timers date', async () => {
+    const getRunningTimeEntryStub = sinon.stub(harvestApi, 'getRunningTimeEntry').resolves(null);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns({ ...timeEntryNotRunning });
+    const expectedUpdatedTimeEntry = { ...timeEntryNotRunning, spent_date: '2022-03-10' };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+    const storePausedTimerStub = sinon.stub(timerFileSystem, 'storePausedTimer');
+
+    await updateTimer('2022-03-10', null, null, null, false, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(storePausedTimerStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    expect(getRunningTimeEntryStub).to.have.been.calledOnce;
+
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+    getRunningTimeEntryStub.restore();
+    storePausedTimerStub.restore();
+  });
+
+  it('should round paused timer', async () => {
+    const getRunningTimeEntryStub = sinon.stub(harvestApi, 'getRunningTimeEntry').resolves(null);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns({ ...timeEntryNotRunning });
+    const expectedUpdatedTimeEntry = { ...timeEntryNotRunning, hours: 0.25 };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+    const storePausedTimerStub = sinon.stub(timerFileSystem, 'storePausedTimer');
+
+    await updateTimer(null, null, null, null, true, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(storePausedTimerStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    expect(getRunningTimeEntryStub).to.have.been.calledOnce;
+
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+    getRunningTimeEntryStub.restore();
+    storePausedTimerStub.restore();
+  });
+
+  it('should add time to paused timer', async () => {
+    const getRunningTimeEntryStub = sinon.stub(harvestApi, 'getRunningTimeEntry').resolves(null);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns({ ...timeEntryNotRunning });
+    const expectedUpdatedTimeEntry = { ...timeEntryNotRunning, hours: 0.37 };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+    const storePausedTimerStub = sinon.stub(timerFileSystem, 'storePausedTimer');
+
+    await updateTimer(null, null, 0.25, null, false, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(storePausedTimerStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    expect(getRunningTimeEntryStub).to.have.been.calledOnce;
+
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+    getRunningTimeEntryStub.restore();
+    storePausedTimerStub.restore();
+  });
+
+  it('should subtract time from paused timer', async () => {
+    const getRunningTimeEntryStub = sinon.stub(harvestApi, 'getRunningTimeEntry').resolves(null);
+    const readPausedTimerStub = sinon
+      .stub(timerFileSystem, 'readPausedTimer')
+      .returns({ ...timeEntryNotRunning, hours: 0.25 });
+    const expectedUpdatedTimeEntry = { ...timeEntryNotRunning, hours: 0.15 };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+    const storePausedTimerStub = sinon.stub(timerFileSystem, 'storePausedTimer');
+
+    await updateTimer(null, null, null, 0.1, false, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(storePausedTimerStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    expect(getRunningTimeEntryStub).to.have.been.calledOnce;
+
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+    getRunningTimeEntryStub.restore();
+    storePausedTimerStub.restore();
+  });
+
+  it('should add and subtract time from a paused timer', async () => {
+    const getRunningTimeEntryStub = sinon.stub(harvestApi, 'getRunningTimeEntry').resolves();
+    const readPausedTimerStub = sinon
+      .stub(timerFileSystem, 'readPausedTimer')
+      .returns({ ...timeEntryNotRunning, hours: 0.3 });
+    const expectedUpdatedTimeEntry = { ...timeEntryNotRunning, hours: 0.55 };
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry').resolves(expectedUpdatedTimeEntry);
+    const storePausedTimerStub = sinon.stub(timerFileSystem, 'storePausedTimer');
+
+    await updateTimer(null, null, 0.5, 0.25, false, 15);
+
+    expect(saveTimeEntryStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(storePausedTimerStub).to.have.been.calledOnceWith(expectedUpdatedTimeEntry);
+    expect(readPausedTimerStub).to.have.been.calledOnce;
+    expect(getRunningTimeEntryStub).to.have.been.calledOnce;
+
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+    getRunningTimeEntryStub.restore();
+    storePausedTimerStub.restore();
+  });
+
+  it('should throw error when paused timers time entry would be below 0 hours after subtracting time.', async () => {
+    const getRunningTimeEntryStub = sinon.stub(harvestApi, 'getRunningTimeEntry').resolves(null);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(timeEntryNotRunning);
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry');
+
+    await expect(updateTimer(null, null, null, 30, false, 15)).to.be.rejectedWith(
+      'Cannot set time entries new to time to a value below 0.',
+    );
+
+    expect(saveTimeEntryStub).not.to.be.called;
+    expect(readPausedTimerStub).to.be.calledOnce;
+    expect(getRunningTimeEntryStub).to.have.been.calledOnce;
+
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+    getRunningTimeEntryStub.restore();
+  });
+
+  it('should throw error when paused timers time entry would be above 24 hours after adding time.', async () => {
+    const getRunningTimeEntryStub = sinon.stub(harvestApi, 'getRunningTimeEntry').resolves(null);
+    const readPausedTimerStub = sinon.stub(timerFileSystem, 'readPausedTimer').returns(timeEntryNotRunning);
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry');
+
+    await expect(updateTimer(null, null, 1500, null, false, 15)).to.be.rejectedWith(
+      'Cannot set time entries new to time to a value above 24h.',
+    );
+
+    expect(saveTimeEntryStub).not.to.be.called;
+    expect(readPausedTimerStub).to.be.calledOnce;
+    expect(getRunningTimeEntryStub).to.have.been.calledOnce;
+
+    saveTimeEntryStub.restore();
+    readPausedTimerStub.restore();
+    getRunningTimeEntryStub.restore();
+  });
+
+  it('should throw error when paused timers time is modified and rounded at the same time', async () => {
+    const saveTimeEntryStub = sinon.stub(harvestApi, 'saveTimeEntry');
+
+    await expect(updateTimer(null, null, 15, null, true, 15)).to.be.rejectedWith(
+      'Rounding and adding/subtracting are exclusive timer actions. Please only use one.',
+    );
+
+    expect(saveTimeEntryStub).not.to.be.called;
+
+    saveTimeEntryStub.restore();
+  });
 });
 
 describe('timer lifecycle', () => {
   it('should start new timer');
-  it('throw error if timer is started when there already is a running timer');
+  it('should throw error if timer is started when there already is a running timer');
   it('should pause running timer');
-  it('throw error if timer is paused when there already is a paused timer');
+  it('should throw error if timer is paused when there already is a paused timer');
   it('should resume paused timer');
-  it('throw error if timer is resumed when there already is a running timer');
+  it('should throw error if timer is resumed when there already is a running timer');
   it('should stop running timer');
   it('should stop paused timer');
-  it('throw error if timer is stopped when there is no running timer');
+  it('should throw error if timer is stopped when there is no running timer');
 });
