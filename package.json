@@ -1,6 +1,6 @@
 {
   "name": "@simonrauch/harvey",
-  "version": "2.3.32",
+  "version": "2.3.33",
   "description": "A simple CLI for Harvest.",
   "repository": {
     "type": "git",
@@ -76,9 +76,12 @@
       "@semantic-release/release-notes-generator",
       "@semantic-release/npm",
       "@semantic-release/github",
-      ["@semantic-release/exec", {
-        "prepare": "npm run package"
-      }],
+      [
+        "@semantic-release/exec",
+        {
+          "prepare": "npm run package"
+        }
+      ],
       [
         "@semantic-release/git",
         {
