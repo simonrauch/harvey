@@ -11,7 +11,7 @@ export function printTimer(timer: HarveyTimer): void {
 
   if (timeEntry && timeEntry.task) {
     tableHead = tableHead.concat(['Task', 'Notes', 'Timer']);
-    colWidth = colWidth.concat([Math.floor((totalWidth - 17) * 0.65), Math.floor((totalWidth - 17) * 0.35), 7]);
+    colWidth = colWidth.concat([Math.floor((totalWidth - 16) * 0.65), Math.floor((totalWidth - 16) * 0.35), 7]);
     tableRow = tableRow.concat([timeEntry.task.name, (timeEntry.notes ??= ''), formatHours(timeEntry.hours)]);
   }
 
