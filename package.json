@@ -35,9 +35,9 @@
     "package": "ncc build --source-map"
   },
   "dependencies": {
+    "axios": "^0.26.1",
     "cli-table": "^0.3.11",
     "exceljs": "^4.3.0",
-    "node-harvest-api": "github:simonrauch/node-harvest-api",
     "yargs": "^17.3.1"
   },
   "devDependencies": {
