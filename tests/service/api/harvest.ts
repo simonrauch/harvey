@@ -4,9 +4,15 @@ import chai from 'chai';
 import chaiNock from 'chai-nock';
 import chaiAsPromised from 'chai-as-promised';
 import {
+  getAuthenticatedUserId,
   getMyProjectAssignments,
   getMyProjectTaskAssignments,
+  getMyTimeEntriesPerDate,
+  isAccountIdAndTokenValid,
   resetHarvestCache,
+  restartTimeEntry,
+  saveTimeEntry,
+  stopTimeEntry,
 } from '../../../src/service/api/harvest';
 import { expect } from 'chai';
 
@@ -100,6 +106,53 @@ const myProjectAssignmentsResponse = {
   },
 };
 
+const user = {
+  id: 666,
+  first_name: 'Simon',
+  last_name: 'Rauch',
+  email: 'sr@simonrauch.com',
+  telephone: '',
+  timezone: 'Amsterdam',
+  weekly_capacity: 144000,
+  has_access_to_all_future_projects: false,
+  is_contractor: false,
+  is_admin: false,
+  is_project_manager: true,
+  can_see_rates: false,
+  can_create_projects: false,
+  can_create_invoices: false,
+  is_active: true,
+  calendar_integration_enabled: false,
+  calendar_integration_source: null,
+  created_at: '2019-01-14T02:03:37Z',
+  updated_at: '2022-02-24T16:17:37Z',
+  roles: [],
+  permissions_claims: [
+    'expenses:read:managed',
+    'expenses:write:own',
+    'projects:read:managed',
+    'timers:read:managed',
+    'timers:write:own',
+  ],
+};
+
+const timeEntryNotRunning = {
+  id: 666,
+  spent_date: '2022-03-15',
+  hours: 0.12,
+  notes: 'note',
+  timer_started_at: '2022-03-15T12:04:45Z',
+  is_running: false,
+  created_at: '2022-03-15T12:04:45Z',
+  updated_at: '2022-03-15T12:04:45Z',
+  user: { id: 666, name: 'Simon Rauch' },
+  client: { id: 666, name: 'Wawiwahu', currency: 'EUR' },
+  project: { id: 666, name: 'Wawiwahu Project', code: 'PID-666' },
+  task: { id: 666, name: 'Example Task' },
+};
+
+const timeEntryRunning = { ...timeEntryNotRunning, is_running: true };
+
 describe('harvest api service', () => {
   beforeEach(() => {
     HarveyConfig.setConfig(defaultConfig);
@@ -111,9 +164,8 @@ describe('harvest api service', () => {
   });
 
   it('should request current users project assignments', async () => {
-    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectAssignments = await getMyProjectAssignments();
@@ -123,9 +175,8 @@ describe('harvest api service', () => {
   });
 
   it('should cache project assignments', async () => {
-    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectAssignments = await getMyProjectAssignments();
@@ -133,9 +184,8 @@ describe('harvest api service', () => {
     expect(projectAssignments.length).to.be.equal(2);
     expect(getMyProjectAssignmentsNock.isDone()).to.be.true;
 
-    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectAssignments2 = await getMyProjectAssignments();
@@ -146,9 +196,8 @@ describe('harvest api service', () => {
   });
 
   it('should reset project assignments cache', async () => {
-    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectAssignments = await getMyProjectAssignments();
@@ -158,9 +207,8 @@ describe('harvest api service', () => {
 
     resetHarvestCache();
 
-    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectAssignments2 = await getMyProjectAssignments();
@@ -171,9 +219,8 @@ describe('harvest api service', () => {
   });
 
   it('should ignore project assignments cache', async () => {
-    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectAssignments = await getMyProjectAssignments();
@@ -181,9 +228,8 @@ describe('harvest api service', () => {
     expect(projectAssignments.length).to.be.equal(2);
     expect(getMyProjectAssignmentsNock.isDone()).to.be.true;
 
-    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectAssignments2 = await getMyProjectAssignments(true);
@@ -194,9 +240,8 @@ describe('harvest api service', () => {
   });
 
   it('should request current users project task assignments', async () => {
-    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectTaskAssignments = await getMyProjectTaskAssignments();
@@ -206,9 +251,8 @@ describe('harvest api service', () => {
   });
 
   it('should cache project task assignments', async () => {
-    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectTaskAssignments = await getMyProjectTaskAssignments();
@@ -216,9 +260,8 @@ describe('harvest api service', () => {
     expect(projectTaskAssignments.length).to.be.equal(4);
     expect(getMyProjectAssignmentsNock.isDone()).to.be.true;
 
-    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectTaskAssignments2 = await getMyProjectTaskAssignments();
@@ -229,9 +272,8 @@ describe('harvest api service', () => {
   });
 
   it('should reset project task assignments cache', async () => {
-    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectTaskAssignments = await getMyProjectTaskAssignments();
@@ -241,9 +283,8 @@ describe('harvest api service', () => {
 
     resetHarvestCache();
 
-    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectTaskAssignments2 = await getMyProjectTaskAssignments();
@@ -254,9 +295,8 @@ describe('harvest api service', () => {
   });
 
   it('should ignore project task assignments cache', async () => {
-    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectTaskAssignments = await getMyProjectTaskAssignments();
@@ -264,9 +304,8 @@ describe('harvest api service', () => {
     expect(projectTaskAssignments.length).to.be.equal(4);
     expect(getMyProjectAssignmentsNock.isDone()).to.be.true;
 
-    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com:443', { encodedQueryParams: true })
+    const getMyProjectAssignmentsNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
       .get('/api/v2/users/me/project_assignments')
-      .query({ page: '1' })
       .reply(200, myProjectAssignmentsResponse, []);
 
     const projectTaskAssignments2 = await getMyProjectTaskAssignments(true);
@@ -275,16 +314,194 @@ describe('harvest api service', () => {
     expect(projectTaskAssignments2).to.be.eql(projectTaskAssignments);
     expect(getMyProjectAssignmentsNock2.isDone()).to.be.true;
   });
-  it('should request current user id');
-  it('should cache current user id');
-  it('should reset current user id cache');
-  it('should ignore current user id cache');
-  it('should post newly created time entry');
-  it('should post update to existing time entry');
-  it('should throw error if id of non existing time entry is given for update request');
-  it('should post update to restart existing time entry');
-  it('should post updatee to stop running time entry');
-  it('should request current users time entries per per day');
-  it('should verify current user is authenticated');
-  it('should verify current user is not authenticated');
+
+  it('should request current user id', async () => {
+    const getUsersMeNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+
+    const userId = await getAuthenticatedUserId();
+
+    expect(userId).to.eql(666);
+    expect(getUsersMeNock.isDone()).to.be.true;
+  });
+
+  it('should cache current user id', async () => {
+    const getUsersMeNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+
+    const userId = await getAuthenticatedUserId();
+
+    expect(getUsersMeNock.isDone()).to.be.true;
+    expect(userId).to.eql(666);
+
+    const getUsersMeNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+
+    const userId2 = await getAuthenticatedUserId();
+
+    expect(userId2).to.eql(userId);
+    expect(getUsersMeNock2.isDone()).to.be.false;
+  });
+
+  it('should reset current user id cache', async () => {
+    const getUsersMeNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+
+    const userId = await getAuthenticatedUserId();
+
+    expect(getUsersMeNock.isDone()).to.be.true;
+    expect(userId).to.eql(666);
+
+    const getUsersMeNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+
+    resetHarvestCache();
+    const userId2 = await getAuthenticatedUserId();
+
+    expect(userId2).to.eql(userId);
+    expect(getUsersMeNock2.isDone()).to.be.true;
+  });
+
+  it('should ignore current user id cache', async () => {
+    const getUsersMeNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+
+    const userId = await getAuthenticatedUserId();
+
+    expect(getUsersMeNock.isDone()).to.be.true;
+    expect(userId).to.eql(666);
+
+    const getUsersMeNock2 = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+
+    const userId2 = await getAuthenticatedUserId(true);
+
+    expect(userId2).to.eql(userId);
+    expect(getUsersMeNock2.isDone()).to.be.true;
+  });
+
+  it('should post newly created time entry', async () => {
+    const postTimeEntryNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .post('/api/v2/time_entries', { ...timeEntryNotRunning, id: undefined })
+      .reply(200, { ...timeEntryNotRunning }, []);
+
+    const timeEntry = await saveTimeEntry({ ...timeEntryNotRunning, id: undefined });
+
+    expect(timeEntry).to.eql(timeEntryNotRunning);
+    expect(postTimeEntryNock.isDone()).to.be.true;
+  });
+
+  it('should post update to existing time entry', async () => {
+    const patchTimeEntryNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .patch('/api/v2/time_entries/' + timeEntryNotRunning.id, { ...timeEntryNotRunning })
+      .reply(200, { ...timeEntryNotRunning }, []);
+
+    const timeEntry = await saveTimeEntry({ ...timeEntryNotRunning });
+
+    expect(timeEntry).to.eql(timeEntryNotRunning);
+    expect(patchTimeEntryNock.isDone()).to.be.true;
+  });
+
+  it('should throw error if id of non existing time entry is given for update request', async () => {
+    const patchTimeEntryNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .patch('/api/v2/time_entries/' + timeEntryNotRunning.id, { ...timeEntryNotRunning })
+      .reply(404, { status: 404, error: 'Not Found' }, []);
+
+    await expect(saveTimeEntry({ ...timeEntryNotRunning })).to.be.rejectedWith('Request failed with status code 404');
+    expect(patchTimeEntryNock.isDone()).to.be.true;
+  });
+
+  it('should post update to restart existing time entry', async () => {
+    const patchTimeEntryNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .patch('/api/v2/time_entries/' + timeEntryNotRunning.id + '/restart', {})
+      .reply(200, { ...timeEntryRunning }, []);
+
+    const timeEntry = await restartTimeEntry({ ...timeEntryNotRunning });
+
+    expect(timeEntry).to.eql(timeEntryRunning);
+    expect(patchTimeEntryNock.isDone()).to.be.true;
+  });
+
+  it('should post update to stop running time entry', async () => {
+    const patchTimeEntryNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .patch('/api/v2/time_entries/' + timeEntryRunning.id + '/stop', {})
+      .reply(200, { ...timeEntryNotRunning }, []);
+
+    const timeEntry = await stopTimeEntry({ ...timeEntryRunning });
+
+    expect(timeEntry).to.eql(timeEntryNotRunning);
+    expect(patchTimeEntryNock.isDone()).to.be.true;
+  });
+
+  it('should request current users time entries per per day', async () => {
+    const expectedTimeEntries = [{ ...timeEntryNotRunning }, { ...timeEntryRunning }];
+    const getUsersMeNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+    const getTimeEntriesNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/time_entries')
+      .query({ from: '2020-12-20', to: '2020-12-20', user_id: '666' })
+      .reply(
+        200,
+        {
+          time_entries: expectedTimeEntries,
+          per_page: 100,
+          total_pages: 1,
+          total_entries: 2,
+          next_page: null,
+          previous_page: null,
+          page: 1,
+          links: {
+            first:
+              'https://api.harvestapp.com/v2/time_entries?from=2020-12-20&page=1&per_page=100&ref=first&to=2020-12-20&user_id=666',
+            next: null,
+            previous: null,
+            last: 'https://api.harvestapp.com/v2/time_entries?from=2020-12-20&page=1&per_page=100&ref=last&to=2020-12-20&user_id=666',
+          },
+        },
+        [],
+      );
+
+    const timeEntries = await getMyTimeEntriesPerDate('2020-12-20');
+
+    expect(timeEntries).to.eql(expectedTimeEntries);
+    expect(getUsersMeNock.isDone()).to.be.true;
+    expect(getTimeEntriesNock.isDone()).to.be.true;
+  });
+
+  it('should verify current user is authenticated', async () => {
+    const getUsersMeNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(200, user, []);
+
+    const credsAreValid = await isAccountIdAndTokenValid('wrong', 'creds');
+
+    expect(credsAreValid).to.be.true;
+    expect(getUsersMeNock.isDone()).to.be.true;
+  });
+
+  it('should verify current user is not authenticated', async () => {
+    const getUsersMeNock = nock('https://api.harvestapp.com', { encodedQueryParams: true })
+      .get('/api/v2/users/me')
+      .reply(
+        401,
+        {
+          error: 'invalid_token',
+          error_description: 'The access token provided is expired, revoked, malformed or invalid for other reasons.',
+        },
+        [],
+      );
+
+    const credsAreValid = await isAccountIdAndTokenValid('wrong', 'creds');
+
+    expect(credsAreValid).to.be.false;
+    expect(getUsersMeNock.isDone()).to.be.true;
+  });
 });
