@@ -75,6 +75,12 @@ export function parseUserDateInput(dateInput?: string): string {
   if (dateInput === undefined || dateInput === null || dateInput === '') {
     return formatDate(new Date());
   }
+
+  if (isRealtiveDateInputString(dateInput)) {
+    const dateFromRelativeDateInput = getDateFromRelativeDateInputString(dateInput);
+    return formatDate(dateFromRelativeDateInput);
+  }
+
   const isoDateRegex = new RegExp('^([0-9]{4})(-?)(1[0-2]|0[1-9])\\2(3[01]|0[1-9]|[12][0-9])$');
   const date = new Date(dateInput);
   if (date.toDateString() === 'Invalid Date' || !isoDateRegex.test(dateInput)) {
@@ -85,4 +91,51 @@ export function parseUserDateInput(dateInput?: string): string {
 
 function formatDate(date: Date): string {
   return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`;
+}
+
+function splitRelativeDateInputString(dateInputString: string): string[] {
+  const number = dateInputString.replace(/[^0-9]/g, '');
+  const split = dateInputString.split(number);
+  const operation = split[0];
+  const timeFrame = split[1] ?? 'day';
+
+  return [operation, number, timeFrame];
+}
+
+function isRealtiveDateInputString(dateInputString: string): boolean {
+  const split = splitRelativeDateInputString(dateInputString);
+
+  if (split[0] !== '+' && split[0] !== '-') return false;
+  if (isNaN(Number(split[1]))) return false;
+  if (Number(split[1]) === 0) return false;
+  if (!isValidTimeFrameString(split[2])) return false;
+
+  return true;
+}
+
+function getDateFromRelativeDateInputString(dateInput: string): Date {
+  const split = splitRelativeDateInputString(dateInput);
+
+  let relativeDays = Number(split[1]);
+
+  if (isRelativeWeekInput(split[2])) {
+    relativeDays = relativeDays * 7;
+  }
+
+  const date = new Date();
+
+  if (split[0] === '+') date.setDate(date.getDate() + relativeDays);
+  if (split[0] === '-') date.setDate(date.getDate() - relativeDays);
+
+  return date;
+}
+
+function isValidTimeFrameString(timeFrameString: string): boolean {
+  const validTimeFrames = ['week', 'weeks', 'w', 'day', 'days', 'd', ''];
+  return validTimeFrames.includes(timeFrameString);
+}
+
+function isRelativeWeekInput(dateInputString: string): boolean {
+  const weekTimeFrames = ['week', 'weeks', 'w'];
+  return weekTimeFrames.includes(dateInputString);
 }
