@@ -59,6 +59,12 @@ Harvey will interpret time inputs according to following criteria:
 Harvey uses the following date format `YYYY-MM-DD` (Example: `2022-03-20`).
 Not passing any date will default to the current date.
 
+Alternativly Harvey can interpret relative dates using the following format: `<+/-><number><day/days/d/week/weeks/w>`. If you want to for example add a time entry with yesterdays date, you can use:
+
+```
+harvey book TEST-123 1:30 --date="-1day"
+```
+
 ### Aliases
 
 To modify time entries on Harvest, we need to specify which project and task they are reffering to. To make this easier Harvey creates aliases and saves them to a file (default: `~/.config/harvey/aliases.json`). The alias is typically a unique substring of the tasks name, like a Jira issue reference. For the most part Harvey will manage those aliases automatically, but you can modify them, by using the following commands:

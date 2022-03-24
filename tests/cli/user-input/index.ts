@@ -111,11 +111,95 @@ describe('user date input parsing', () => {
     expect(() => {
       parseUserDateInput('1');
     }).to.throw('Invalid date input.');
+  });
+});
+
+describe('relative user date input parsing', () => {
+  const fixedDate = new Date('2020-05-16');
+  let sandbox: SinonSandbox, clock: SinonFakeTimers;
+
+  beforeEach(() => {
+    HarveyConfig.setConfig(defaultConfig);
+    sandbox = sinon.createSandbox();
+    clock = sinon.useFakeTimers(fixedDate.getTime());
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    clock.restore();
+  });
+
+  it('should interpret "day" input as day', () => {
+    expect(parseUserDateInput('+2day')).to.be.equal('2020-05-18');
+    expect(parseUserDateInput('-2day')).to.be.equal('2020-05-14');
+  });
+
+  it('should interpret "days" input as day', () => {
+    expect(parseUserDateInput('+2days')).to.be.equal('2020-05-18');
+    expect(parseUserDateInput('-2days')).to.be.equal('2020-05-14');
+  });
+
+  it('should interpret "d" input as day', () => {
+    expect(parseUserDateInput('+2d')).to.be.equal('2020-05-18');
+    expect(parseUserDateInput('-2d')).to.be.equal('2020-05-14');
+  });
+
+  it('should interpret empty relative day/date input as day', () => {
+    expect(parseUserDateInput('+2')).to.be.equal('2020-05-18');
+    expect(parseUserDateInput('-2')).to.be.equal('2020-05-14');
+  });
+
+  it('should interpret "week" input as 7 days', () => {
+    expect(parseUserDateInput('+2week')).to.be.equal('2020-05-30');
+    expect(parseUserDateInput('-2week')).to.be.equal('2020-05-02');
+  });
+
+  it('should interpret "weeks" input as 7 days', () => {
+    expect(parseUserDateInput('+2weeks')).to.be.equal('2020-05-30');
+    expect(parseUserDateInput('-2weeks')).to.be.equal('2020-05-02');
+  });
+
+  it('should interpret "w" input as 7 days', () => {
+    expect(parseUserDateInput('+2w')).to.be.equal('2020-05-30');
+    expect(parseUserDateInput('-2w')).to.be.equal('2020-05-02');
+  });
+
+  it("should throw error when + or - isn't specified", () => {
     expect(() => {
-      parseUserDateInput('-1');
+      parseUserDateInput('2weeks');
     }).to.throw('Invalid date input.');
     expect(() => {
-      parseUserDateInput('-20');
+      parseUserDateInput('2day');
+    }).to.throw('Invalid date input.');
+  });
+
+  it("should throw error when relative number input isn't specified", () => {
+    expect(() => {
+      parseUserDateInput('+week');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('+d');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('+');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('-week');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('-d');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('-');
+    }).to.throw('Invalid date input.');
+  });
+
+  it('should throw error when decimal relative number input is given', () => {
+    expect(() => {
+      parseUserDateInput('-2.0weeks');
+    }).to.throw('Invalid date input.');
+    expect(() => {
+      parseUserDateInput('-2,0weeks');
     }).to.throw('Invalid date input.');
   });
 });
