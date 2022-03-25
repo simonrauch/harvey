@@ -11,7 +11,7 @@ import {
 } from '../../business/timer';
 import { parseUserDateInput, parseUserTimeInput } from '../user-input';
 
-type Options = {
+export type Options = {
   config: string;
   alias?: string;
   note?: string;
@@ -45,6 +45,7 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     });
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
+  console.log('yo');
   const { config, alias, note, date, action, add, subtract, round, rounding_interval } = argv;
 
   try {
