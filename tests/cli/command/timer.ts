@@ -166,4 +166,101 @@ describe('timer command', () => {
     loadConfigStub.restore();
     printMessageStub.restore();
   });
+
+  it('should stop timer', async () => {
+    const showTimerStub = sinon.stub(timerBusiness, 'showTimer');
+    const stopRunningTimerStub = sinon.stub(timerBusiness, 'stopRunningTimer');
+    const loadConfigStub = sinon.stub(HarveyConfig, 'loadConfig').returns(defaultConfig);
+    const exitStub = sinon.stub(process, 'exit');
+
+    await runTimerCommand('stop');
+
+    expect(stopRunningTimerStub).to.have.been.calledWith(false, defaultConfig.defaultRoundingInterval);
+    expect(showTimerStub).to.have.been.called;
+    expect(loadConfigStub).to.have.been.calledWith('~/.config/harvey/config.json');
+    expect(exitStub).to.have.been.calledWith(0);
+
+    showTimerStub.restore();
+    stopRunningTimerStub.restore();
+    exitStub.restore();
+    loadConfigStub.restore();
+  });
+
+  it('should stop timer and round up', async () => {
+    const showTimerStub = sinon.stub(timerBusiness, 'showTimer');
+    const stopRunningTimerStub = sinon.stub(timerBusiness, 'stopRunningTimer');
+    const loadConfigStub = sinon.stub(HarveyConfig, 'loadConfig').returns(defaultConfig);
+    const exitStub = sinon.stub(process, 'exit');
+
+    await runTimerCommand('stop -r');
+
+    expect(stopRunningTimerStub).to.have.been.calledWith(true, defaultConfig.defaultRoundingInterval);
+    expect(showTimerStub).to.have.been.called;
+    expect(loadConfigStub).to.have.been.calledWith('~/.config/harvey/config.json');
+    expect(exitStub).to.have.been.calledWith(0);
+
+    showTimerStub.restore();
+    stopRunningTimerStub.restore();
+    exitStub.restore();
+    loadConfigStub.restore();
+  });
+
+  it('should stop timer and round up with specified rounding interval', async () => {
+    const showTimerStub = sinon.stub(timerBusiness, 'showTimer');
+    const stopRunningTimerStub = sinon.stub(timerBusiness, 'stopRunningTimer');
+    const loadConfigStub = sinon.stub(HarveyConfig, 'loadConfig').returns(defaultConfig);
+    const exitStub = sinon.stub(process, 'exit');
+
+    await runTimerCommand('stop -r --ri 5');
+
+    expect(stopRunningTimerStub).to.have.been.calledWith(true, 5);
+    expect(showTimerStub).to.have.been.called;
+    expect(loadConfigStub).to.have.been.calledWith('~/.config/harvey/config.json');
+    expect(exitStub).to.have.been.calledWith(0);
+
+    showTimerStub.restore();
+    stopRunningTimerStub.restore();
+    exitStub.restore();
+    loadConfigStub.restore();
+  });
+
+  it('should pause running timer', async () => {
+    const showTimerStub = sinon.stub(timerBusiness, 'showTimer');
+    const pauseActiveTimerStub = sinon.stub(timerBusiness, 'pauseActiveTimer');
+    const loadConfigStub = sinon.stub(HarveyConfig, 'loadConfig').returns(defaultConfig);
+    const exitStub = sinon.stub(process, 'exit');
+
+    await runTimerCommand('pause');
+
+    expect(pauseActiveTimerStub).to.have.been.called;
+    expect(showTimerStub).to.have.been.called;
+    expect(loadConfigStub).to.have.been.calledWith('~/.config/harvey/config.json');
+    expect(exitStub).to.have.been.calledWith(0);
+
+    showTimerStub.restore();
+    pauseActiveTimerStub.restore();
+    exitStub.restore();
+    loadConfigStub.restore();
+  });
+
+  it('should resume paused timer', async () => {
+    const showTimerStub = sinon.stub(timerBusiness, 'showTimer');
+    const resumePausedTimerStub = sinon.stub(timerBusiness, 'resumePausedTimer');
+    const loadConfigStub = sinon.stub(HarveyConfig, 'loadConfig').returns(defaultConfig);
+    const exitStub = sinon.stub(process, 'exit');
+
+    await runTimerCommand('resume');
+
+    expect(resumePausedTimerStub).to.have.been.called;
+    expect(showTimerStub).to.have.been.called;
+    expect(loadConfigStub).to.have.been.calledWith('~/.config/harvey/config.json');
+    expect(exitStub).to.have.been.calledWith(0);
+
+    showTimerStub.restore();
+    resumePausedTimerStub.restore();
+    exitStub.restore();
+    loadConfigStub.restore();
+  });
+
+  it('should update current timer');
 });
