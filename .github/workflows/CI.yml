@@ -5,6 +5,8 @@ on:
     - opened
     - synchronize
     - reopened
+    branches:
+    - 'master'
 jobs:
   setup:
     name: Setup
