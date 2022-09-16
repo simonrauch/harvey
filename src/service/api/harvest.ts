@@ -29,15 +29,7 @@ function getAxiosRequestConfig(): object {
 }
 
 function getBaseUrl(): string {
-  let harvestSubdomain;
-
-  try {
-    harvestSubdomain = HarveyConfig.getConfig().harvestSubdomain;
-  } catch (error) {
-    harvestSubdomain = 'api';
-  }
-
-  return `https://${harvestSubdomain}.harvestapp.com/api/v2`;
+  return `https://${HarveyConfig.getConfig().harvestSubdomain ?? 'api'}.harvestapp.com/api/v2`;
 }
 
 export async function getMyProjectAssignments(forceFetch = false): Promise<HarvestProjectAssignment[]> {
