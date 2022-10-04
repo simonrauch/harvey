@@ -1,12 +1,10 @@
 name: CI
 on:
-  pull_request_target:
+  pull_request:
     types:
     - opened
     - synchronize
     - reopened
-    branches:
-    - 'master'
 jobs:
   setup:
     name: Setup
