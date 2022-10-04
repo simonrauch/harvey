@@ -12,7 +12,7 @@ export function printTimeEntryTable(timeEntries: HarvestTimeEntry[]): void {
 
   timeEntries.forEach((timeEntry, index) => {
     totalTime += timeEntry.hours;
-    table.push([index, timeEntry.task?.name ?? '', timeEntry.notes ?? '', formatHours(timeEntry.hours)]);
+    table.push([index.toString(), timeEntry.task?.name ?? '', timeEntry.notes ?? '', formatHours(timeEntry.hours)]);
   });
   process.stdout.write(table.toString() + '\n');
   process.stdout.write(' Sum:' + new Array(totalWidth - 7).join(' ') + formatHours(totalTime) + '\n\n');
