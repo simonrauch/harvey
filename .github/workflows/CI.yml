@@ -34,7 +34,7 @@ jobs:
         run: npm run eslint:ci
       - name: Annotate EsLint results
         uses: ataylorme/eslint-annotate-action@1.2.0
-        if: always()
+        if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           report-json: 'eslint-report.json'
@@ -69,7 +69,7 @@ jobs:
         run: npm run test:ci
       - name: Report test results
         uses: dorny/test-reporter@v1
-        if: always()
+        if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           name: Test results
           path: mocha-test-results.json
