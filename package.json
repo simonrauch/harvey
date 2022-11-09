@@ -35,7 +35,7 @@
     "package": "ncc build --source-map"
   },
   "dependencies": {
-    "axios": "^0.27.0",
+    "axios": "^1.1.3",
     "cli-table": "^0.3.11",
     "exceljs": "^4.3.0",
     "yargs": "^17.3.1"
