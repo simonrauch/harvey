@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Bump Homebrew formula
-        uses: mislav/bump-homebrew-formula-action@v1
+        uses: mislav/bump-homebrew-formula-action@v2
         with:
           formula-name: harvey
           formula-path: Formula/harvey.rb
